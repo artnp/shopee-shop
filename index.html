@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shopee Shorts</title>
+    <title>รีวิววิดีโอสั้น</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/2065/2065224.png">
     <style>
         * {
             box-sizing: border-box;
@@ -137,26 +138,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* --- Saved Bar (Text Only) --- */
-        /* --- Saved Bar (Text Only) --- */
-        .saved-item {
-            position: relative;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 10px 15px;
-            /* Text padding */
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
 
-        .saved-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(5px);
-        }
 
         .saved-item-title {
             font-size: 13px;
@@ -196,6 +178,9 @@
             background: #ff0000;
             transform: scale(1.1);
         }
+
+
+
 
         /* --- Nav Buttons --- */
         .nav-buttons {
@@ -410,6 +395,7 @@
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
             animation: pulse 2s infinite;
+            white-space: nowrap;
         }
 
         @keyframes pulse {
@@ -637,6 +623,7 @@
 
     <div class="saved-bar" id="savedBar"></div>
 
+
     <div class="nav-buttons">
         <div class="nav-btn" id="btnUp" onclick="scrollSlide(-1)">
             <svg viewBox="0 0 24 24">
@@ -660,7 +647,14 @@
             savedList = JSON.parse(localStorage.getItem('shopeeShortsSaved')) || [];
         } catch (e) { savedList = []; }
         let isMuted = true;
+        let userInteracted = false; // Require interaction before auto-unmute
         let observer;
+
+        // Capture first interaction to allow auto-audio
+        const setInteracted = () => { userInteracted = true; };
+        document.addEventListener('click', setInteracted, { capture: true });
+        document.addEventListener('keydown', setInteracted, { capture: true });
+        document.addEventListener('touchstart', setInteracted, { capture: true });
 
         const ICON_HEART = '<path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>';
 
@@ -669,14 +663,17 @@
             try {
                 // Persistent Session Check
                 const sessionData = sessionStorage.getItem('shopeeShortsSession');
-                const searchStr = decodeURIComponent(window.location.search).substring(1);
-                let targetId = null;
-                let keyword = '';
+                const urlParams = new URLSearchParams(window.location.search);
 
-                if (/^\d{5,}/.test(searchStr)) targetId = searchStr.split('&')[0];
-                else if (searchStr.startsWith('id=')) targetId = searchStr.split('=')[1].split('&')[0];
-                else if (searchStr.startsWith('q=')) keyword = searchStr.split('=')[1].split('&')[0];
-                else if (searchStr) keyword = searchStr;
+                // Support ?v=ID, ?id=ID, ?q=KEYWORD
+                let targetId = urlParams.get('v') || urlParams.get('id');
+                let keyword = urlParams.get('q');
+
+                // Legacy fallback support (e.g. ?12345)
+                if (!targetId && !keyword) {
+                    const raw = window.location.search.substring(1);
+                    if (/^\d+$/.test(raw)) targetId = raw;
+                }
 
                 if (sessionData && !keyword && !targetId) {
                     allProducts = JSON.parse(sessionData);
@@ -701,7 +698,19 @@
                         title: (p.tag && p.tag[0]) ? p.tag[0] : 'สินค้าแนะนำ',
                         desc: (p.data_shopee) ? p.data_shopee.slice(0, 3).join(' | ') : '',
                         link: p.link_shopee || '#',
-                        price: p.price || ''
+                        price: p.price || '',
+                        image: (() => {
+                            let raw = p.image || p.image_url || p.images || p.img || p.picture || p.cover;
+                            if (Array.isArray(raw)) return raw[0];
+                            if (typeof raw === 'string') {
+                                if (raw.startsWith('[')) {
+                                    try { return JSON.parse(raw.replace(/'/g, '"'))[0]; } catch (e) { }
+                                }
+                                if (raw.includes(',')) return raw.split(',')[0].trim();
+                                return raw;
+                            }
+                            return null;
+                        })()
                     }));
                     if (!keyword && !targetId) allProducts.sort(() => 0.5 - Math.random());
                     sessionStorage.setItem('shopeeShortsSession', JSON.stringify(allProducts));
@@ -732,9 +741,27 @@
                 }
 
                 renderList();
+                renderSavedBar(); // Re-render to update images from fetched data
+
+
+
+
+
 
 
                 if (!keyword && targetId) {
+                    // Auto-save logic (User Request)
+                    const targetProd = allProducts.find(p => String(p.id) === String(targetId));
+                    if (targetProd) {
+                        const existingIdx = savedList.findIndex(x => String(x.id) === String(targetId));
+                        if (existingIdx === -1) {
+                            if (savedList.length >= 20) savedList.shift();
+                            savedList.push({ id: String(targetId), title: targetProd.title, image: targetProd.image });
+                            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+                            renderSavedBar();
+                        }
+                    }
+
                     setTimeout(() => {
                         const el = document.getElementById('product-' + targetId);
                         if (el) {
@@ -742,6 +769,17 @@
                             setTimeout(updateNavState, 150);
                         }
                     }, 100);
+                } else if (keyword && displayProducts.length > 0) {
+                    // Auto-save First Result for Search (User Request)
+                    const firstP = displayProducts[0];
+                    const existingIdx = savedList.findIndex(x => String(x.id) === String(firstP.id));
+                    if (existingIdx === -1) {
+                        if (savedList.length >= 20) savedList.shift();
+                        savedList.push({ id: String(firstP.id), title: firstP.title, image: firstP.image });
+                        localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+                        renderSavedBar();
+                    }
+                    setTimeout(updateNavState, 150);
                 } else {
                     setTimeout(updateNavState, 150);
                 }
@@ -790,6 +828,9 @@
         function renderList() {
             const container = document.getElementById('container');
             container.innerHTML = '';
+            // If RecBar exists, make sure to hide if suggestions shown? No, user wants it back.
+            // renderRecBar(); // Can be called here too if filtering changes recs
+
             if (window.isShowingSuggestions) {
                 const msg = document.createElement('div');
                 msg.style.cssText = "position:fixed; top:85px; left:50%; transform:translateX(-50%); z-index:110; background:rgba(238,77,45,0.95); padding:8px 24px; border-radius:30px; font-size:13px; font-weight:bold; backdrop-filter:blur(5px); box-shadow:0 4px 15px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); color:#fff;";
@@ -864,9 +905,26 @@
 
                     if (entry.isIntersecting) {
                         // Load and Play Current
+
+                        if (userInteracted) {
+                            // User has clicked/tapped before -> We can force Unmute
+                            isMuted = false;
+                            video.muted = false;
+                            video.volume = 1.0;
+                        } else {
+                            // No interaction yet -> Browser blocks Audio -> Keep Muted & Show Icon
+                            isMuted = true;
+                            video.muted = true;
+                        }
+                        updateAllMuteIcons();
+
                         loadVideo(video);
-                        video.muted = isMuted; // Sync mute state
-                        video.play().catch(() => { video.muted = true; video.play(); });
+                        video.play().catch(() => {
+                            // If autoplay blocked, keep muted but try to play
+                            video.muted = true;
+                            video.play();
+                        });
+
 
                         // Preload Neighbors (Prev + Next)
                         const parent = entry.target;
@@ -879,9 +937,9 @@
                         cleanupVideos(parent);
 
                         const pid = entry.target.getAttribute('data-id');
-                        history.replaceState(null, '', 'index.html?' + pid);
+                        history.replaceState(null, '', '?v=' + pid);
                         const prod = allProducts.find(p => p.id === pid);
-                        if (prod) document.title = prod.title + " | " + prod.id + " - Shopee Shorts";
+                        if (prod) document.title = prod.title + " - Shopee Shorts";
 
                     } else {
                         video.pause();
@@ -956,6 +1014,7 @@
         function pauseAll() { document.querySelectorAll('video').forEach(v => v.pause()); }
 
         window.toggleMute = function () {
+            userInteracted = true;
             isMuted = !isMuted;
             document.querySelectorAll('video').forEach(v => v.muted = isMuted);
             updateAllMuteIcons();
@@ -977,9 +1036,14 @@
         window.toggleSave = function (id, title, e) {
             if (e) e.stopPropagation();
             const idx = savedList.findIndex(x => x.id === id);
+
             if (idx === -1) {
+                // Find product to get image
+                const prod = allProducts.find(p => p.id === id);
+                const image = prod ? prod.image : null;
+
                 if (savedList.length >= 20) savedList.shift();
-                savedList.push({ id, title });
+                savedList.push({ id, title, image });
                 const btn = document.getElementById('btn-save-' + id);
                 if (btn) btn.classList.add('saved');
             } else {
@@ -1009,7 +1073,7 @@
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth' });
             } else {
-                window.location.href = 'index.html?' + id;
+                window.location.href = '?v=' + id;
             }
         };
 
@@ -1020,7 +1084,7 @@
                 const prod = allProducts.find(p => p.id === id);
                 if (prod) { setTimeout(() => { pauseAll(); window.open(prod.link, '_blank'); }, 800); }
             } else {
-                window.location.href = 'index.html?' + id;
+                window.location.href = '?v=' + id;
             }
         };
 
@@ -1032,13 +1096,30 @@
                 return;
             }
             bar.style.display = 'flex';
-            bar.innerHTML = '<div class="saved-bar-header" style="font-size:16px; margin-bottom:5px;">รายการที่ชอบ</div>' + savedList.map(item => `
+            bar.innerHTML = '<div class="saved-bar-header" style="font-size:16px; margin-bottom:5px;">ชอบสิ่งนี้มากๆ</div>' + savedList.map(item => {
+                // Try to find image if missing (compatibility with old saves)
+                let imgUrl = item.image;
+                if (!imgUrl) {
+                    // Fix: Use String(item.id) to ensure match with String(p.id)
+                    const prod = allProducts.find(p => String(p.id) === String(item.id));
+                    if (prod) {
+                        imgUrl = prod.image;
+                        // Persist found image back to savedList
+                        item.image = imgUrl;
+                        try { localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList)); } catch (e) { }
+                    }
+                }
+
+                return `
             <div class="saved-item" onclick="clickSaved('${item.id}')">
+                ${imgUrl ? `<img src="${imgUrl}" alt="img">` : '<div style="width:40px;height:40px;background:#555;border-radius:8px;margin-right:10px;display:flex;align-items:center;justify-content:center;">🛍️</div>'}
                 <div class="saved-item-title">${item.title}</div>
                 <div class="saved-remove" onclick="removeSaved(event, '${item.id}')">×</div>
-            </div>
-            `).join('');
+            </div>`;
+            }).join('');
         }
+
+
 
 
         init();
