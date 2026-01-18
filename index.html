@@ -1,1 +1,1048 @@
-index.html
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shopee Shorts</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            /* Hide main browser scrollbar */
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* --- Layout & Container --- */
+        .shorts-container {
+            height: 100%;
+            width: 100%;
+            overflow-y: scroll;
+            /* Allow internal scrolling */
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            /* Hide internal scrollbar Firefox */
+            scrollbar-width: none;
+            /* Hide internal scrollbar Firefox */
+            position: relative;
+            z-index: 10;
+        }
+
+        .shorts-container::-webkit-scrollbar {
+            display: none;
+            /* Hide internal scrollbar Chrome/Safari */
+        }
+
+        /* --- Saved Bar (Vibrant Fun AI Theme) --- */
+        .saved-bar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 260px;
+            max-height: 85%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+            overflow-y: auto;
+            scrollbar-width: none;
+            background: linear-gradient(-45deg, rgba(82, 33, 209, 0.7), rgba(220, 31, 255, 0.6), rgba(0, 212, 255, 0.6), rgba(255, 102, 0, 0.5));
+            background-size: 400% 400%;
+            animation: vibrantMove 10s ease infinite;
+            backdrop-filter: blur(20px);
+            padding: 18px;
+            border-radius: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .saved-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes vibrantMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .saved-bar-header {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #fff;
+            margin-bottom: 8px;
+            padding-left: 5px;
+            font-weight: 900;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .saved-bar-header::before {
+            content: '✨';
+            font-size: 16px;
+        }
+
+        .saved-item {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .saved-item:hover {
+            transform: translateX(5px) scale(1.02);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+        }
+
+        .saved-item img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-right: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Saved Bar (Text Only) --- */
+        /* --- Saved Bar (Text Only) --- */
+        .saved-item {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 15px;
+            /* Text padding */
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .saved-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .saved-item-title {
+            font-size: 13px;
+            color: #fff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+            padding-right: 20px;
+            /* More space for remove button */
+            text-align: left;
+        }
+
+        .saved-remove {
+            position: absolute;
+            right: -5px;
+            top: -5px;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ff3b3b;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            border: 2px solid #fff;
+            z-index: 10;
+        }
+
+        .saved-remove:hover {
+            background: #ff0000;
+            transform: scale(1.1);
+        }
+
+        /* --- Nav Buttons --- */
+        .nav-buttons {
+            position: fixed;
+            right: 20px;
+            /* Adjust to stay at edge or follow rec-bar */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        @media (min-width: 1401px) {
+            .nav-buttons {
+                right: max(20px, calc(50% - 280px));
+            }
+        }
+
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            /* Subtle default */
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Removed individual backgrounds to keep it subtle */
+
+        /* Show color and pop only on click */
+        #btnUp:active {
+            background: linear-gradient(-45deg, #00d4ff, #8250ff);
+            transform: scale(1.3);
+            /* Pop effect */
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        }
+
+        #btnDown:active {
+            background: linear-gradient(-45deg, #dc1fff, #ff6600);
+            transform: scale(1.3);
+            /* Pop effect */
+            box-shadow: 0 0 20px rgba(220, 31, 255, 0.6);
+        }
+
+        .nav-btn:active {
+            filter: brightness(1.3);
+        }
+
+        .nav-btn.hidden {
+            opacity: 0;
+            visibility: hidden;
+            /* Absolute hiding */
+            pointer-events: none;
+            transform: scale(0.5) translateY(20px);
+        }
+
+        .nav-btn svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        /* --- Video Item --- */
+        .short-item {
+            height: 100%;
+            width: 100%;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        video {
+            height: 98%;
+            width: 98%;
+            object-fit: cover;
+            border-radius: 40px;
+        }
+
+        /* --- Overlay --- */
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent);
+            padding: 80px 20px 50px 20px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .overlay-content {
+            max-width: 600px;
+            margin: 0 auto;
+            pointer-events: auto;
+            width: 100%;
+        }
+
+        .product-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+            color: #fff;
+        }
+
+        .product-desc {
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- Actions --- */
+        .actions-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .price-tag {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2ecc71;
+            margin-right: 12px;
+            white-space: nowrap;
+            position: relative;
+            display: inline-block;
+            user-select: none;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        .price-tag::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 3px;
+            background: #ff4d4d;
+            transform: translateY(-50%) rotate(-5deg);
+            box-shadow: 0 0 5px rgba(255, 77, 77, 0.8);
+            animation: priceStrike 2s infinite ease-in-out;
+        }
+
+        @keyframes priceStrike {
+            0% {
+                width: 0;
+                left: 0;
+            }
+
+            40% {
+                width: 110%;
+                left: -5%;
+            }
+
+            70% {
+                width: 110%;
+                left: -5%;
+                opacity: 1;
+            }
+
+            100% {
+                width: 110%;
+                left: -5%;
+                opacity: 0;
+            }
+        }
+
+        .buy-btn {
+            background: linear-gradient(90deg, #ee4d2d, #ff7337);
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 32px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            box-shadow: 0 4px 20px rgba(238, 77, 45, 0.5);
+            flex-grow: 1;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(238, 77, 45, 0.7);
+            }
+
+            70% {
+                transform: scale(1.04);
+                box-shadow: 0 0 0 12px rgba(238, 77, 45, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(238, 77, 45, 0);
+            }
+        }
+
+        .inline-btn {
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .inline-btn:active {
+            transform: scale(0.9);
+        }
+
+        .inline-btn svg {
+            fill: rgba(255, 77, 77, 0.35);
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .inline-btn:hover svg {
+            fill: rgba(255, 77, 77, 0.8);
+            transform: scale(1.15);
+        }
+
+        .inline-btn.saved svg {
+            fill: #ff0000 !important;
+            filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+            animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .inline-btn.btn-mute {
+            width: 64px;
+            /* Even bigger */
+            height: 64px;
+        }
+
+        .inline-btn img {
+            width: 42px;
+            /* Bigger Icon */
+            height: 42px;
+            transition: 0.2s;
+        }
+
+        @keyframes heartPop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.4);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Desktop Layout Fixes */
+        @media (min-width: 1100px) {
+            video {
+                width: 100%;
+                max-width: 440px;
+            }
+
+            .shorts-container {
+                width: 100%;
+                max-width: 440px;
+                margin: 0 auto;
+                background: #111;
+                border-radius: 40px;
+                box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+            }
+
+            .overlay,
+            .search-container {
+                max-width: 440px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .nav-buttons {
+                right: max(20px, calc(50% - 280px));
+            }
+
+            .saved-bar {
+                left: max(20px, calc(50% - 540px));
+                width: 260px;
+            }
+        }
+
+        @media (max-width: 1099px) {
+            .saved-bar {
+                left: 10px;
+                width: 55px;
+                padding: 5px;
+                border-radius: 12px;
+                background: rgba(15, 5, 30, 0.8);
+            }
+
+            .saved-bar .saved-item-title,
+            .saved-bar .saved-bar-header,
+            .saved-bar .saved-remove {
+                display: none;
+            }
+
+            .saved-bar .saved-item {
+                padding: 3px;
+                justify-content: center;
+            }
+
+            /* Note: .saved-item img styling removed as requested in text-only update */
+
+            .saved-bar:hover {
+                width: 260px;
+                padding: 18px;
+                border-radius: 28px;
+            }
+
+            .saved-bar:hover .saved-item-title,
+            .saved-bar:hover .saved-bar-header,
+            .saved-bar:hover .saved-remove {
+                display: flex;
+            }
+
+            .saved-bar:hover .saved-item {
+                justify-content: flex-start;
+                padding: 12px;
+            }
+        }
+
+        /* --- Search Bar (Top) --- */
+        .search-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            /* Ensure on top */
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 25px;
+            border-radius: 32px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ee4d2d;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 พิมพ์เพื่อค้นหาสินค้า..."
+            oninput="handleSearch(this.value)">
+    </div>
+
+    <div class="saved-bar" id="savedBar"></div>
+
+    <div class="nav-buttons">
+        <div class="nav-btn" id="btnUp" onclick="scrollSlide(-1)">
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" />
+            </svg>
+        </div>
+        <div class="nav-btn" id="btnDown" onclick="scrollSlide(1)">
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41,8.59L12,13.17L16.59,8.59L18,10L12,16L6,10L7.41,8.59Z" />
+            </svg>
+        </div>
+    </div>
+
+    <div class="shorts-container" id="container"></div>
+
+    <script>
+        let allProducts = [];
+        let displayProducts = [];
+        let savedList = [];
+        try {
+            savedList = JSON.parse(localStorage.getItem('shopeeShortsSaved')) || [];
+        } catch (e) { savedList = []; }
+        let isMuted = true;
+        let observer;
+
+        const ICON_HEART = '<path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>';
+
+        async function init() {
+            renderSavedBar(); // Render immediately
+            try {
+                // Persistent Session Check
+                const sessionData = sessionStorage.getItem('shopeeShortsSession');
+                const searchStr = decodeURIComponent(window.location.search).substring(1);
+                let targetId = null;
+                let keyword = '';
+
+                if (/^\d{5,}/.test(searchStr)) targetId = searchStr.split('&')[0];
+                else if (searchStr.startsWith('id=')) targetId = searchStr.split('=')[1].split('&')[0];
+                else if (searchStr.startsWith('q=')) keyword = searchStr.split('=')[1].split('&')[0];
+                else if (searchStr) keyword = searchStr;
+
+                if (sessionData && !keyword && !targetId) {
+                    allProducts = JSON.parse(sessionData);
+                } else {
+                    // New: Fetch from Supabase
+                    const SUPABASE_URL = 'https://jbbirnklofoscfhpedes.supabase.co';
+                    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpiYmlybmtsb2Zvc2NmaHBlZGVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3Mzk0MjcsImV4cCI6MjA4NDMxNTQyN30.oboZnO28wZDxFTkDfId5ZhAdIsAZXcs9So1ZcUtfgtE';
+
+                    const resp = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.desc&limit=1000`, {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+
+                    if (!resp.ok) throw new Error('Load failed');
+                    let rawData = await resp.json();
+
+                    allProducts = rawData.filter(p => p.id && p.video).map(p => ({
+                        id: String(p.id),
+                        url: p.video,
+                        title: (p.tag && p.tag[0]) ? p.tag[0] : 'สินค้าแนะนำ',
+                        desc: (p.data_shopee) ? p.data_shopee.slice(0, 3).join(' | ') : '',
+                        link: p.link_shopee || '#',
+                        price: p.price || ''
+                    }));
+                    if (!keyword && !targetId) allProducts.sort(() => 0.5 - Math.random());
+                    sessionStorage.setItem('shopeeShortsSession', JSON.stringify(allProducts));
+                }
+
+                if (keyword) {
+                    const decodedKey = decodeURIComponent(keyword).trim();
+                    document.getElementById('searchInput').value = decodedKey;
+
+                    // Smart Routing: Filter Playlist to MATCH keyword only
+                    const lowerKey = decodedKey.toLowerCase();
+                    const filtered = allProducts.filter(p =>
+                        p.title.toLowerCase().includes(lowerKey) ||
+                        p.desc.toLowerCase().includes(lowerKey)
+                    );
+
+                    if (filtered.length > 0) {
+                        displayProducts = filtered;
+                        // Shuffle slightly for freshness, but keep relevance
+                        displayProducts.sort(() => 0.5 - Math.random());
+                    } else {
+                        // Fallback if not found
+                        displayProducts = [...allProducts].sort(() => 0.5 - Math.random());
+                        window.isShowingSuggestions = true;
+                    }
+                } else {
+                    displayProducts = [...allProducts]; // Default random or sorted
+                }
+
+                renderList();
+
+
+                if (!keyword && targetId) {
+                    setTimeout(() => {
+                        const el = document.getElementById('product-' + targetId);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'instant' });
+                            setTimeout(updateNavState, 150);
+                        }
+                    }, 100);
+                } else {
+                    setTimeout(updateNavState, 150);
+                }
+
+                document.getElementById('loading').style.display = 'none';
+                // renderSavedBar(); // Moved to top of init for immediate display
+
+            } catch (e) {
+                document.getElementById('loading').innerHTML = `<div style="color:red">${e.message}</div>`;
+            }
+        }
+
+        function filterProducts(keyword) {
+            if (!keyword) {
+                displayProducts = [...allProducts];
+                window.isShowingSuggestions = false;
+            } else {
+                const lower = keyword.toLowerCase();
+                const keywords = lower.split(/\s+/).filter(k => k.length > 0);
+                let scored = allProducts.map(p => {
+                    let score = 0;
+                    const title = p.title.toLowerCase();
+                    const desc = p.desc.toLowerCase();
+                    if (title.includes(lower)) score += 500;
+                    keywords.forEach(k => {
+                        if (title.includes(k)) score += 100;
+                        if (desc.includes(k)) score += 20;
+                    });
+                    return { ...p, score };
+                }).filter(p => p.score > 0);
+
+                scored.sort((a, b) => b.score - a.score);
+                if (scored.length === 0) {
+                    window.isShowingSuggestions = true;
+                    displayProducts = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 15);
+                } else {
+                    window.isShowingSuggestions = false;
+                    displayProducts = scored;
+                }
+            }
+            renderList();
+        }
+
+        function handleSearch(val) { filterProducts(val); }
+
+        function renderList() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            if (window.isShowingSuggestions) {
+                const msg = document.createElement('div');
+                msg.style.cssText = "position:fixed; top:85px; left:50%; transform:translateX(-50%); z-index:110; background:rgba(238,77,45,0.95); padding:8px 24px; border-radius:30px; font-size:13px; font-weight:bold; backdrop-filter:blur(5px); box-shadow:0 4px 15px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); color:#fff;";
+                msg.innerHTML = "✨ ไม่พบที่ค้นหา แต่ฉันขอแนะนำสิ่งนี้แทน!";
+                container.appendChild(msg);
+            }
+            displayProducts.forEach(v => appendVideo(v));
+            setupObserver();
+            updateAllMuteIcons();
+            updateNavState();
+
+        }
+
+        function appendVideo(v) {
+            const container = document.getElementById('container');
+            const div = document.createElement('div');
+            div.className = 'short-item';
+            div.id = 'product-' + v.id;
+            div.setAttribute('data-id', v.id);
+
+            const isSaved = savedList.some(item => item.id === v.id);
+            const formattedPrice = v.price ? parseInt(v.price).toLocaleString() : '';
+
+            // Use data-src for Lazy Loading (Poster removed per request)
+            div.innerHTML = `
+            <video class="short-video" data-src="${v.url}" loop playsinline preload="none" ${isMuted ? 'muted' : ''}></video>
+            <div class="overlay">
+                <div class="overlay-content">
+                    <div class="product-title">${v.title}</div>
+                    <div class="product-desc">${v.desc}</div>
+                    <div class="actions-row">
+                        <div class="inline-btn ${isSaved ? 'saved' : ''}" id="btn-save-${v.id}">
+                            <svg viewBox="0 0 24 24">${ICON_HEART}</svg>
+                        </div>
+                        ${formattedPrice ? `<div class="price-tag">฿${formattedPrice}</div>` : ''}
+                        <a href="${v.link}" class="buy-btn" target="_blank" onclick="pauseAll()">
+                            <span>🛒 ดูสินค้านี้</span>
+                        </a>
+                        <div class="inline-btn btn-mute" onclick="toggleMute()">
+                            <div class="mute-icon-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            // Onclick handler attached to video element later after creation
+            const vidEl = div.querySelector('video');
+            vidEl.onclick = function () {
+                if (this.paused) {
+                    loadVideo(this);
+                    this.play();
+                } else {
+                    this.pause();
+                }
+            };
+
+            // Safe event listener for Save button
+            const saveBtn = div.querySelector(`#btn-save-${v.id}`);
+            if (saveBtn) saveBtn.onclick = (e) => toggleSave(v.id, v.title, e);
+
+            container.appendChild(div);
+        }
+
+        function setupObserver() {
+            if (window.observer) window.observer.disconnect();
+
+            const options = { root: document.getElementById('container'), threshold: 0.6 };
+            window.observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (!video) return;
+
+                    if (entry.isIntersecting) {
+                        // Load and Play Current
+                        loadVideo(video);
+                        video.muted = isMuted; // Sync mute state
+                        video.play().catch(() => { video.muted = true; video.play(); });
+
+                        // Preload Neighbors (Prev + Next)
+                        const parent = entry.target;
+                        const prev = parent.previousElementSibling;
+                        const next = parent.nextElementSibling;
+                        if (prev) loadVideo(prev.querySelector('video'));
+                        if (next) loadVideo(next.querySelector('video'));
+
+                        // Cleanup Distant Videos
+                        cleanupVideos(parent);
+
+                        const pid = entry.target.getAttribute('data-id');
+                        history.replaceState(null, '', 'index.html?' + pid);
+                        const prod = allProducts.find(p => p.id === pid);
+                        if (prod) document.title = prod.title + " | " + prod.id + " - Shopee Shorts";
+
+                    } else {
+                        video.pause();
+                        video.currentTime = 0;
+                    }
+                });
+            }, options);
+
+            document.querySelectorAll('.short-item').forEach(item => window.observer.observe(item));
+        }
+
+        function loadVideo(v) {
+            if (v.getAttribute('src')) return true; // Already loaded
+            const src = v.getAttribute('data-src');
+            if (src) {
+                v.src = src;
+                v.load();
+                return true;
+            }
+            return false;
+        }
+
+        function cleanupVideos(currentItem) {
+            const allItems = Array.from(document.querySelectorAll('.short-item'));
+            const currentIndex = allItems.indexOf(currentItem);
+
+            allItems.forEach((item, index) => {
+                // Keep only range of [current-2, current+2] loaded
+                if (Math.abs(index - currentIndex) > 2) {
+                    const v = item.querySelector('video');
+                    if (v && v.getAttribute('src')) {
+                        v.removeAttribute('src'); // Unload source
+                        v.load(); // Reset player
+                    }
+                }
+            });
+        }
+
+        function scrollSlide(dir) {
+            // Auto Unmute on navigation click
+            if (isMuted) {
+                isMuted = false;
+                document.querySelectorAll('video').forEach(v => v.muted = false);
+                updateAllMuteIcons();
+            }
+
+            const h = window.innerHeight;
+            document.getElementById('container').scrollBy({ top: dir * h, behavior: 'smooth' });
+        }
+
+        // Global scroll handler to support wheel anywhere
+        window.addEventListener('wheel', (e) => {
+            const container = document.getElementById('container');
+            // Check if scrolling inside saved-bar or rec-bar, ignore global scroll
+            if (e.target.closest('.saved-bar') || e.target.closest('.rec-bar')) return;
+
+            e.preventDefault();
+            container.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        }, { passive: false });
+        function updateNavState() {
+            const container = document.getElementById('container');
+            const btnUp = document.getElementById('btnUp');
+            const btnDown = document.getElementById('btnDown');
+            if (!btnUp || !btnDown) return;
+            if (container.scrollTop <= 10) btnUp.classList.add('hidden');
+            else btnUp.classList.remove('hidden');
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) btnDown.classList.add('hidden');
+            else btnDown.classList.remove('hidden');
+        }
+        document.getElementById('container').addEventListener('scroll', updateNavState);
+
+        function pauseAll() { document.querySelectorAll('video').forEach(v => v.pause()); }
+
+        window.toggleMute = function () {
+            isMuted = !isMuted;
+            document.querySelectorAll('video').forEach(v => v.muted = isMuted);
+            updateAllMuteIcons();
+        };
+
+        function updateAllMuteIcons() {
+            const wraps = document.querySelectorAll('.mute-icon-wrap');
+            wraps.forEach(wrap => {
+                if (isMuted) {
+                    wrap.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/4067/4067572.png">`;
+                    wrap.parentElement.style.display = 'flex';
+                } else {
+                    wrap.innerHTML = '';
+                    wrap.parentElement.style.display = 'none'; // Hide button when sound is ON
+                }
+            });
+        }
+
+        window.toggleSave = function (id, title, e) {
+            if (e) e.stopPropagation();
+            const idx = savedList.findIndex(x => x.id === id);
+            if (idx === -1) {
+                if (savedList.length >= 20) savedList.shift();
+                savedList.push({ id, title });
+                const btn = document.getElementById('btn-save-' + id);
+                if (btn) btn.classList.add('saved');
+            } else {
+                savedList.splice(idx, 1);
+                const btn = document.getElementById('btn-save-' + id);
+                if (btn) btn.classList.remove('saved');
+            }
+            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+            renderSavedBar();
+        };
+
+        window.removeSaved = function (e, id) {
+            e.stopPropagation();
+            savedList = savedList.filter(x => x.id !== id);
+            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+            renderSavedBar();
+            const btn = document.getElementById('btn-save-' + id);
+            if (btn) btn.classList.remove('saved');
+        };
+
+        window.playVideo = function (id) {
+            // Hide recommendation bar immediately upon click
+            const bar = document.getElementById('recBar');
+            if (bar) bar.style.display = 'none';
+
+            const el = document.getElementById('product-' + id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                window.location.href = 'index.html?' + id;
+            }
+        };
+
+        window.clickSaved = function (id) {
+            const el = document.getElementById('product-' + id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                const prod = allProducts.find(p => p.id === id);
+                if (prod) { setTimeout(() => { pauseAll(); window.open(prod.link, '_blank'); }, 800); }
+            } else {
+                window.location.href = 'index.html?' + id;
+            }
+        };
+
+        function renderSavedBar() {
+            const bar = document.getElementById('savedBar');
+            if (savedList.length === 0) {
+                bar.style.display = 'none';
+                bar.innerHTML = '';
+                return;
+            }
+            bar.style.display = 'flex';
+            bar.innerHTML = '<div class="saved-bar-header" style="font-size:16px; margin-bottom:5px;">รายการที่ชอบ</div>' + savedList.map(item => `
+            <div class="saved-item" onclick="clickSaved('${item.id}')">
+                <div class="saved-item-title">${item.title}</div>
+                <div class="saved-remove" onclick="removeSaved(event, '${item.id}')">×</div>
+            </div>
+            `).join('');
+        }
+
+
+        init();
+    </script>
+</body>
+
+</html>
