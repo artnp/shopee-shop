@@ -22,8 +22,112 @@
             overflow: hidden;
             /* Hide main browser scrollbar */
             background: #000;
+            background: radial-gradient(circle at 50% 100%, #1a2a6c, #b21f1f, #fdbb2d);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: #fff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Aurora Background Effect (Default) */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 15% 50%, rgba(0, 255, 127, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(200, 50, 255, 0.1), transparent 25%);
+            filter: blur(50px);
+            z-index: 0;
+            animation: auroraMove 15s infinite alternate;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+
+        /* Beat Mode Override (Triggered when sound is ON) */
+        body.beat-mode::before {
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center,
+                    #000000 0%,
+                    #1a0505 20%,
+                    #250000 40%,
+                    #1a0505 70%,
+                    #000000 100%);
+            filter: blur(40px);
+            animation: syncedBeat 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 1;
+            pointer-events: none;
+            transition: background 0.5s ease;
+        }
+
+        body.beat-mode::after {
+            background: radial-gradient(circle at center, rgba(255, 0, 0, 0.2), transparent 70%);
+            mix-blend-mode: overlay;
+            animation: syncedOverlay 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+        }
+
+        @keyframes syncedBeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            15% {
+                transform: scale(1.03);
+                opacity: 0.6;
+            }
+
+            30% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            45% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+
+            60% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes syncedOverlay {
+            0% {
+                opacity: 0;
+            }
+
+            45% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes auroraMove {
+
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
         }
 
         /* --- Layout & Container --- */
@@ -31,20 +135,16 @@
             height: 100%;
             width: 100%;
             overflow-y: scroll;
-            /* Allow internal scrolling */
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
             -ms-overflow-style: none;
-            /* Hide internal scrollbar Firefox */
             scrollbar-width: none;
-            /* Hide internal scrollbar Firefox */
             position: relative;
             z-index: 10;
         }
 
         .shorts-container::-webkit-scrollbar {
             display: none;
-            /* Hide internal scrollbar Chrome/Safari */
         }
 
         /* --- Saved Bar (Vibrant Fun AI Theme) --- */
@@ -287,8 +387,9 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent);
-            padding: 80px 20px 50px 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
+            padding: 80px 20px 100px 20px;
+            /* Increased bottom padding for badge space */
             pointer-events: none;
             display: flex;
             flex-direction: column;
@@ -328,6 +429,101 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .bottom-badges {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .safety-badge,
+        .fb-follow-btn-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: rgba(0, 10, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            font-size: 0.68rem;
+            color: #b0bec5;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            opacity: 0.85;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .fb-follow-btn-inline {
+            background: rgba(24, 119, 242, 0.25);
+            border-color: rgba(24, 119, 242, 0.4);
+            color: #fff;
+        }
+
+        .safety-badge:hover,
+        .fb-follow-btn-inline:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .fb-follow-btn-inline:hover {
+            background: rgba(24, 119, 242, 0.5);
+        }
+
+        .safety-badge svg,
+        .fb-follow-btn-inline svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .safety-badge svg {
+            fill: #40c4ff;
+        }
+
+        .fb-follow-btn-inline svg {
+            fill: #fff;
+        }
+
+        @keyframes fadeInSafe {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 0.85;
+                transform: translateY(0);
+            }
+        }
+
+        /* Neon Progress Bar */
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00f2ff, #bc13fe);
+            width: 0%;
+            box-shadow: 0 0 10px #00f2ff, 0 0 20px #bc13fe;
+            border-radius: 0 4px 4px 0;
+            transition: width 0.1s linear;
         }
 
         .price-tag {
@@ -446,6 +642,73 @@
             fill: #ff0000 !important;
             filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
             animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes syncedBeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            15% {
+                transform: scale(1.05);
+                opacity: 0.55;
+            }
+
+            /* Lub */
+            25% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            45% {
+                transform: scale(1.35);
+                opacity: 0.75;
+            }
+
+            /* DUB (BIG BEAT) */
+            60% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes syncedOverlay {
+            0% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            15% {
+                opacity: 0.15;
+                transform: scale(1.05);
+            }
+
+            /* Lub */
+            25% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            45% {
+                opacity: 0.4;
+                transform: scale(1.3);
+            }
+
+            /* DUB (FLASH) */
+            60% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
 
         .inline-btn.btn-mute {
@@ -599,6 +862,131 @@
             margin-bottom: 15px;
         }
 
+        /* --- Double Tap Heart Animation --- */
+        .heart-pop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 100;
+            pointer-events: none;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+        }
+
+        .heart-pop.animate {
+            animation: heartShoot 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes heartShoot {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+
+            30% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -150%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* --- Particle Canvas --- */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* --- AI Assistant (น้องรับจ้าง) --- */
+        .ai-assistant-wrap {
+            position: fixed;
+            bottom: 120px;
+            /* Near the buy button row */
+            left: 50%;
+            transform: translateX(110px) translateY(20px);
+            /* Move right of center */
+            z-index: 200;
+            display: flex;
+            flex-direction: row-reverse;
+            /* Avatar on the right, bubble on the left */
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Adjust for Mobile */
+        @media (max-width: 600px) {
+            .ai-assistant-wrap {
+                left: auto;
+                right: 10px;
+                transform: translateX(0) translateY(20px);
+            }
+        }
+
+        .ai-assistant-wrap.visible {
+            opacity: 1;
+            transform: translateX(110px) translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .ai-assistant-wrap.visible {
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        .ai-bubble {
+            background: rgba(255, 255, 255, 0.98);
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 20px 20px 0 20px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            position: relative;
+            max-width: 160px;
+            line-height: 1.4;
+            border: 2px solid #ee4d2d;
+            text-align: center;
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #ee4d2d;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            animation: bounceIn 1s infinite alternate;
+        }
+
+        .ai-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes bounceIn {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-5px);
+            }
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -617,7 +1005,7 @@
     </div>
 
     <div class="search-container">
-        <input type="text" class="search-input" id="searchInput" placeholder="🔍 พิมพ์เพื่อค้นหาสินค้า..."
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาสินค้า..."
             oninput="handleSearch(this.value)">
     </div>
 
@@ -637,7 +1025,19 @@
         </div>
     </div>
 
+
     <div class="shorts-container" id="container"></div>
+
+    <!-- Particle Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- AI Assistant -->
+    <div class="ai-assistant-wrap" id="aiAssistant">
+        <div class="ai-avatar">
+            <img src="https://cdn-icons-png.flaticon.com/128/4140/4140047.png" alt="น้องรับจ้าง">
+        </div>
+        <div class="ai-bubble" id="aiMsg">ตัวนี้หนูใช้เอง ดีจริงพี่!</div>
+    </div>
 
     <script>
         let allProducts = [];
@@ -648,6 +1048,7 @@
         } catch (e) { savedList = []; }
         let isMuted = true;
         let userInteracted = false; // Require interaction before auto-unmute
+        let isShopping = false; // Prevent autoplay when shopping
         let observer;
 
         // Capture first interaction to allow auto-audio
@@ -772,7 +1173,7 @@
                 } else if (keyword && displayProducts.length > 0) {
                     // Auto-save First Result for Search (User Request)
                     const firstP = displayProducts[0];
-                    const existingIdx = savedList.findIndex(x => String(x.id) === String(firstP.id));
+                    const existingIdx = savedList.findIndex(x => String(firstP.id) === String(firstP.id));
                     if (existingIdx === -1) {
                         if (savedList.length >= 20) savedList.shift();
                         savedList.push({ id: String(firstP.id), title: firstP.title, image: firstP.image });
@@ -874,10 +1275,66 @@
                         </div>
                     </div>
                 </div>
+                <!-- Bottom Badges Container -->
+                <div class="bottom-badges">
+                    <div class="safety-badge">
+                        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                        <span>สินค้าปลอดภัย ภายใต้มาตรการ Shopee</span>
+                    </div>
+                    <a href="https://www.facebook.com/nongrabjang" target="_blank" class="fb-follow-btn-inline">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.15 5.96C15.21 5.96 16.12 6.04 16.12 6.04V8.51H15.01C13.77 8.51 13.38 9.28 13.38 10.07V12.06H16.16L15.72 14.96H13.38V21.96C18.16 21.21 21.82 17.06 21.82 12.06C21.82 6.53 17.32 2.04 12 2.04Z"/></svg>
+                        <span>น้องรับจ้าง</span>
+                    </a>
+                </div>
+                <!-- Neon Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <!-- 3D Heart Overlay -->
+                <div class="heart-pop">
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="#ff4d4d">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
             </div>`;
 
             // Onclick handler attached to video element later after creation
             const vidEl = div.querySelector('video');
+            const pBar = div.querySelector('.progress-bar');
+            const hPop = div.querySelector('.heart-pop');
+
+            // Double Tap Detection
+            let lastTap = 0;
+            vidEl.addEventListener('touchstart', (e) => {
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    handleDoubleTap(v);
+                }
+                lastTap = now;
+            });
+            // Also for Desktop
+            vidEl.addEventListener('dblclick', () => handleDoubleTap(v));
+
+            function handleDoubleTap(v) {
+                // Heart Animation
+                hPop.classList.remove('animate');
+                void hPop.offsetWidth; // Trigger reflow
+                hPop.classList.add('animate');
+
+                // Save if not already saved
+                const isSaved = savedList.some(item => item.id === v.id);
+                if (!isSaved) {
+                    toggleSave(v.id, v.title);
+                }
+            }
+
+            // Progress Bar Update
+            vidEl.addEventListener('timeupdate', () => {
+                if (vidEl.duration) {
+                    const pct = (vidEl.currentTime / vidEl.duration) * 100;
+                    pBar.style.width = pct + '%';
+                }
+            });
             vidEl.onclick = function () {
                 if (this.paused) {
                     loadVideo(this);
@@ -905,6 +1362,14 @@
 
                     if (entry.isIntersecting) {
                         // Load and Play Current
+
+                        // IF SHOPPING, DO NOT PLAY
+                        if (window.isShopping) {
+                            // Just load it but don't play
+                            loadVideo(video);
+                            video.pause();
+                            return;
+                        }
 
                         if (userInteracted) {
                             // User has clicked/tapped before -> We can force Unmute
@@ -1022,6 +1487,14 @@
 
         function updateAllMuteIcons() {
             const wraps = document.querySelectorAll('.mute-icon-wrap');
+
+            // Toggle Beat Mode on Body
+            if (isMuted) {
+                document.body.classList.remove('beat-mode');
+            } else {
+                document.body.classList.add('beat-mode');
+            }
+
             wraps.forEach(wrap => {
                 if (isMuted) {
                     wrap.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/4067/4067572.png">`;
@@ -1078,13 +1551,40 @@
         };
 
         window.clickSaved = function (id) {
-            const el = document.getElementById('product-' + id);
+            // SET SHOPPING MODE
+            window.isShopping = true;
+
+            // Try to find the element in the DOM
+            let el = document.getElementById('product-' + id);
+            const prod = allProducts.find(p => String(p.id) === String(id));
+
+            // If not found in DOM but exists in data, inject it dynamically
+            if (!el && prod) {
+                appendVideo(prod);
+                setupObserver(); // Refresh observer for the new element
+                el = document.getElementById('product-' + id);
+            }
+
             if (el) {
+                // Smooth scroll to the video
                 el.scrollIntoView({ behavior: 'smooth' });
-                const prod = allProducts.find(p => p.id === id);
-                if (prod) { setTimeout(() => { pauseAll(); window.open(prod.link, '_blank'); }, 800); }
+
+                // Open Shopee link after short delay (to let scroll finish)
+                if (prod) {
+                    setTimeout(() => {
+                        pauseAll();
+                        window.open(prod.link, '_blank');
+
+                        // Reset shopping mode after a few seconds so user can resume normally if they come back
+                        setTimeout(() => { window.isShopping = false; }, 3000);
+                    }, 800);
+                } else {
+                    window.isShopping = false;
+                }
             } else {
-                window.location.href = '?v=' + id;
+                // Fallback only if product completely missing from data
+                console.error("Product not found:", id);
+                window.isShopping = false;
             }
         };
 
@@ -1123,6 +1623,160 @@
 
 
         init();
+        // --- Particle Magic Logic ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 4 - 2;
+                this.speedY = Math.random() * -3 - 1;
+                this.color = `hsl(${Math.random() * 60 + 180}, 100%, 70%)`; // Blue/Cyan tones
+                this.alpha = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.02;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function handleParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(handleParticles);
+        }
+        handleParticles();
+
+        document.getElementById('container').addEventListener('scroll', () => {
+            // Spawn particles at random locations during scroll
+            for (let i = 0; i < 5; i++) {
+                particles.push(new Particle(Math.random() * canvas.width, canvas.height));
+            }
+        });
+
+        // --- AI Assistant Logic ---
+        const phrases = [
+            "ตัวนี้หนูใช้เอง ดีจริงพี่!",
+            "ราคานี้พลาดแล้วเสียดายแย่",
+            "อันนี้ขายดีมาก รีบตำเลย!",
+            "ของมันต้องมีนะพี่!",
+            "ส่งไวมากร้านนี้ หนูคอนเฟิร์ม",
+            "คุ้มกว่านี้ไม่มีแล้วนะจ๊ะ",
+            "พี่จ๋า... อันนี้ลดเยอะมากกก",
+            "กดดูตระกร้าเลยพี่ ของแถมน่ารักมาก",
+            "ชิ้นนี้เพื่อนหนูทักทุกคน สวยจริง!",
+            "โปรลับมีแค่ช่วงนี้นะคะพี่",
+            "พี่ดูสิ... รีวิวอย่างแน่น!",
+            "หนูคัดมาให้แล้วเน้นๆ เลยนะ",
+            "ของแท้แน่นอน ล้านเปอร์เซ็นต์",
+            "พี่จ๋า... ช้าหมด อดนะ หนูเตือนแล้วนะ",
+            "จัดเลยพี่ สวยจบในชิ้นเดียว!",
+            "ใส่แล้วดูดีขึ้น 100% เชื่อหนู",
+            "อันนี้ดาราใช้กันเยอะมากพี่",
+            "ถูกกว่าเดินไปซื้อเองที่ห้างอีก",
+            "งานดี งานละเอียด ไม่ก๊อกแก๊กนะ",
+            "พี่ต้องลอง! แล้วจะรักเหมือนหนู",
+            "คุณภาพเกินราคาไปไกลมากพี่จ๋า",
+            "หนูแอบเก็บไว้ใช้เองตั้งหลายชิ้น!",
+            "อย่าคิดนานพี่ เดี๋ยวสต็อกหมดก่อน",
+            "พี่ดูตรงนี้... วัสดุเค้าดีจริงๆ นะ",
+            "สีสรสวยมาก ของจริงสวยกว่าในคลิปอีก",
+            "เอาไปเป็นของขวัญเค้าถูกใจแน่นอน",
+            "แฟนหนูเห็นยังชมว่าดีเลยพี่",
+            "ประหยัดเงินไปได้เยอะเลยพี่คุ้มสุดๆ",
+            "ลองแล้วจะรู้ว่าทำไมหนูถึงเชียร์",
+            "พี่จ๋าาา กดเร็ววว ของลดราคาอยู่!",
+            "ตัวนี้ฟังก์ชั่นครบ ใช้งานง่ายมาก",
+            "ทนทานมากพี่ ใช้ได้ยาวๆ เลย",
+            "ใครๆ ก็มีกัน พี่จะพลาดได้ไงเนอะ",
+            "ยอดขายอันดับ 1 ในหมวดนี้เลยนะ",
+            "พี่... อันนี้หนูให้ 10/10 เลยค่ะ",
+            "สั่งเลยพี่ เดี๋ยวหนูไปช่วยลุ้นของส่งถึง",
+            "ร้านนี้บริการดีมาก หนูประทับใจ",
+            "พี่คะ... ชิ้นนี้เปลี่ยนชีวิตหนูเลยนะ!",
+            "ดูราคาดิพี่ เท่ากับกาแฟไม่กี่แก้วเอง",
+            "สวยตะโกน! จนคนต้องมองตามแน่นอน",
+            "พี่จะขาว/สวย/เท่ ขึ้นทันตาเห็นเลย!",
+            "ของดีบอกต่อ หนูไม่หลอกพี่แน่นอน",
+            "พี่เชื่อใจน้องได้เลย ชิ้นนี้เด็ดจริง",
+            "นาทีทองนะคะพี่ จัดด่วนนน!",
+            "แพ็กของมาอย่างดี ปลอดภัยหายห่วง",
+            "ตัวช่วยดีๆ แบบนี้ หาไม่ได้ง่ายๆ นะ",
+            "พี่จ๋า... หนูจัดมาให้พี่โดยเฉพาะเลย",
+            "ความสุขเล็กๆ ในราคาสบายกระเป๋าจ้ะ",
+            "พี่คะ อันนี้ต้องจัดจริงๆ นะ",
+            "น้องรับจ้างฟันธง! ดีชัวร์จ้าพี่"
+        ];
+        const avatars = [
+            "https://cdn-icons-png.flaticon.com/128/10851/10851235.png",
+            "https://cdn-icons-png.flaticon.com/128/6723/6723246.png",
+            "https://cdn-icons-png.flaticon.com/128/10477/10477506.png",
+            "https://cdn-icons-png.flaticon.com/128/4138/4138902.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851314.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851330.png",
+            "https://cdn-icons-png.flaticon.com/128/18404/18404971.png",
+            "https://cdn-icons-png.flaticon.com/128/10477/10477511.png",
+            "https://cdn-icons-png.flaticon.com/128/1469/1469584.png",
+            "https://cdn-icons-png.flaticon.com/128/11035/11035630.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851216.png",
+            "https://cdn-icons-png.flaticon.com/128/8304/8304094.png",
+            "https://cdn-icons-png.flaticon.com/128/11052/11052505.png",
+            "https://cdn-icons-png.flaticon.com/128/7357/7357207.png",
+            "https://cdn-icons-png.flaticon.com/128/3993/3993143.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851262.png",
+            "https://cdn-icons-png.flaticon.com/128/11349/11349015.png"
+        ];
+        const aiWrap = document.getElementById('aiAssistant');
+        const aiMsg = document.getElementById('aiMsg');
+        const aiImg = aiWrap.querySelector('img');
+
+        function showAIAssistant() {
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+
+            aiImg.src = randomAvatar;
+            aiMsg.innerText = randomPhrase;
+            aiWrap.classList.add('visible');
+
+            setTimeout(() => {
+                aiWrap.classList.remove('visible');
+            }, 5000); // Show for 5 seconds
+        }
+
+        // Show every 15-25 seconds
+        setInterval(() => {
+            if (!window.isShopping) showAIAssistant();
+        }, 20000);
+
+        // Initial show after 3 seconds
+        setTimeout(showAIAssistant, 3000);
+
     </script>
 </body>
 
