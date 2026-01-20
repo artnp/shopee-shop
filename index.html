@@ -1808,11 +1808,24 @@
 
         window.removeSaved = function (e, id) {
             e.stopPropagation();
+
+            // Find product to get link before removing
+            const prod = allProducts.find(p => String(p.id) === String(id));
+            const link = prod ? prod.link : null;
+
             savedList = savedList.filter(x => x.id !== id);
             localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
             renderSavedBar();
+            
             const btn = document.getElementById('btn-save-' + id);
             if (btn) btn.classList.remove('saved');
+
+            // Open Shopee Link after 1s
+            if (link) {
+                setTimeout(() => {
+                    window.open(link, '_blank');
+                }, 1000);
+            }
         };
 
         window.playVideo = function (id) {
