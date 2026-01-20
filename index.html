@@ -26,16 +26,15 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Aurora Background Effect (Static for Performance) */
+        /* Static Background (No Aurora) */
         body::before {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 15% 50%, rgba(0, 255, 127, 0.05), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(200, 50, 255, 0.05), transparent 25%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
             z-index: 0;
             pointer-events: none;
         }
@@ -1763,7 +1762,7 @@
                                  </div>
                              </div>
                         </div>
-                        <a href="${v.link}" class="buy-btn" target="_blank" onclick="pauseAll()">
+                        <a href="${v.link}" class="buy-btn" target="_blank" onclick="pauseAll()" onmousemove="startCheer(event)" onmouseleave="stopCheer()">
                             <span class="pointing-finger">👉</span>
                             <span>ดูสินค้านี้</span>
                         </a>
@@ -2247,8 +2246,108 @@
 
 
         init();
-        /* --- Particle System Removed for Performance --- */
-        /* JS logic for particles has been removed to prevent freezing on mobile devices. */
+        // --- Particle Magic Logic (Optimized Lite Version) ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                // Simplified properties for performance
+                if (type === 'scroll') {
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * -5 - 2;
+                    this.color = `hsla(${Math.random() * 360}, 70%, 70%, 0.6)`;
+                    this.decay = 0.02;
+                } else if (type === 'cheer') {
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 4 - 2;
+                    this.speedY = Math.random() * -8 - 3;
+                    this.color = `hsla(${Math.random() * 60 + 10}, 90%, 60%, 0.8)`;
+                    this.decay = 0.03;
+                } else {
+                    this.size = 2;
+                    this.speedX = 0;
+                    this.speedY = -1;
+                    this.color = '#fff';
+                    this.decay = 0.01;
+                }
+                this.alpha = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function handleParticles() {
+            if (particles.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                animationFrameId = null;
+                return; // Stop loop if empty to save CPU
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            animationFrameId = requestAnimationFrame(handleParticles);
+        }
+
+        function wakeUpParticles() {
+            if (!animationFrameId) {
+                handleParticles();
+            }
+        }
+
+        // --- Cheer Effect (Button Hover) ---
+        let cheerInterval;
+        window.startCheer = function (e) {
+            if (cheerInterval) return;
+            // Burst small amount
+            for (let i = 0; i < 5; i++) particles.push(new Particle(e.clientX, e.clientY, 'cheer'));
+            wakeUpParticles();
+
+            cheerInterval = setInterval(() => {
+                if (particles.length > 50) return; // Cap max particles
+                for (let i = 0; i < 2; i++) {
+                    particles.push(new Particle(Math.random() * canvas.width, canvas.height, 'cheer'));
+                }
+                if (window.lastMouseX) {
+                    particles.push(new Particle(window.lastMouseX, window.lastMouseY, 'cheer'));
+                }
+                wakeUpParticles();
+            }, 100); // Slower tick than before
+        }
+
+        window.stopCheer = function () {
+            clearInterval(cheerInterval);
+            cheerInterval = null;
+        }
 
         // --- AI Assistant Logic ---
         const phrases = [
