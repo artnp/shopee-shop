@@ -556,31 +556,23 @@
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
         }
 
+        /* Optimized Price Animation (No Blurs/Heavy Filters) */
         @keyframes bombBlast {
 
             0%,
-            26% {
+            25% {
                 opacity: 0;
-                transform: translateY(-50%) scale(0);
-                filter: brightness(2) blur(0);
+                transform: translateY(-50%) scale(0.5);
             }
 
             28% {
                 opacity: 1;
-                filter: brightness(5) blur(0);
-                transform: translateY(-50%) scale(2.5);
+                transform: translateY(-50%) scale(1.5);
             }
 
-            32% {
-                opacity: 1;
-                filter: brightness(1.5) blur(2px);
-                transform: translateY(-50%) scale(30) rotate(15deg);
-            }
-
-            45% {
+            35% {
                 opacity: 0;
-                filter: blur(40px);
-                transform: translateY(-50%) scale(45) rotate(-10deg);
+                transform: translateY(-50%) scale(2);
             }
 
             100% {
@@ -588,35 +580,36 @@
             }
         }
 
-        /* Looping Animation Sequence */
         .animate-price .price-bomb {
             animation: bombBlast 4s infinite;
+            /* Remove heavy shadow/gradient if needed, but let's try keeping static style first */
         }
 
         .animate-price .strike-line {
             animation: strikeLoop 4s infinite;
         }
 
+        .animate-price .real-price {
+            animation: realLoop 4s infinite;
+        }
+
         .animate-price .fake-price {
             animation: fakeLoop 4s infinite;
         }
 
-        .animate-price .real-price {
-            animation: realLoop 4s infinite, pricePulse 1s infinite alternate;
-        }
-
+        /* Simplified Loops: Opacity + Transform only */
         @keyframes strikeLoop {
             0% {
                 width: 0;
                 opacity: 1;
             }
 
-            12% {
+            15% {
                 width: 95%;
                 opacity: 1;
             }
 
-            28% {
+            30% {
                 width: 95%;
                 opacity: 0;
             }
@@ -630,28 +623,61 @@
         @keyframes fakeLoop {
             0% {
                 opacity: 1;
-                filter: blur(0);
+                transform: scale(1);
             }
 
-            15% {
+            20% {
                 opacity: 1;
-                filter: blur(0);
+                transform: scale(1);
             }
 
             30% {
                 opacity: 0;
-                filter: blur(10px);
                 transform: scale(1.1);
             }
 
-            95% {
+            /* Basic fade out zoom */
+            90% {
                 opacity: 0;
-                filter: blur(10px);
+                transform: scale(1);
             }
 
             100% {
                 opacity: 1;
-                filter: blur(0);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes realLoop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            25% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            35% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+            /* Pop in */
+            45% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.8);
             }
         }
 
@@ -1533,7 +1559,7 @@
 
                 if (!initialTargetId) initialTargetId = targetId;
 
-                if (sessionData && !keyword && !targetId) {
+                if (sessionData) {
                     allProducts = JSON.parse(sessionData);
                 } else {
                     // New: Fetch from Supabase
@@ -2422,7 +2448,8 @@
             "https://cdn-icons-png.flaticon.com/128/11349/11349015.png"
         ];
         function showAIAssistant() {
-            if (isMuted) return; // Only show if sound is ON
+            // if (isMuted) return; // Allow showing even if muted per user request
+
 
             const aiWrap = document.getElementById('aiAssistant');
             const aiMsg = document.getElementById('aiMsg');
