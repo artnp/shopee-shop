@@ -1803,7 +1803,7 @@
             const isSaved = savedList.some(item => item.id === v.id);
             const priceVal = v.price ? parseInt(v.price) : 0;
             const formattedPrice = priceVal.toLocaleString();
-            const fakePrice = priceVal > 0 ? Math.floor(priceVal * 1.35).toLocaleString() : '';
+            const fakePrice = priceVal > 0 ? Math.floor(priceVal * 1.33).toLocaleString() : '';
             const viewers = Math.floor(Math.random() * (450 - 120 + 1)) + 120; // Random 120-450
 
             // Use data-src for Lazy Loading (Poster removed per request)
@@ -1995,6 +1995,12 @@
                         history.replaceState(null, '', '?v=' + pid);
                         const prod = allProducts.find(p => p.id === pid);
                         if (prod) document.title = prod.title + " - น้องรับจ้าง";
+
+                        // Reset Social Proof Toast for new video
+                        const toast = document.getElementById('socialToast');
+                        if (toast) toast.classList.remove('show');
+                        if (window.nextToastTimeout) clearTimeout(window.nextToastTimeout);
+                        window.nextToastTimeout = setTimeout(showRandomToast, 5000);
 
                     } else {
                         video.pause();
@@ -2195,13 +2201,14 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 8000); // Increase to 8 seconds for better readability
+
+            // Schedule next toast
+            if (window.nextToastTimeout) clearTimeout(window.nextToastTimeout);
+            window.nextToastTimeout = setTimeout(showRandomToast, 15000 + Math.random() * 10000);
         }
 
-        // Start random toasts after 5s, then every 15-25s
-        setTimeout(() => {
-            showRandomToast();
-            setInterval(showRandomToast, 15000 + Math.random() * 10000);
-        }, 5000);
+        // Initial start for Social Proof Toasts
+        window.nextToastTimeout = setTimeout(showRandomToast, 5000);
 
         window.copyShareLink = function (id) {
             const url = new URL(window.location.href);
