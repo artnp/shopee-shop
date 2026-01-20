@@ -520,12 +520,14 @@
             /* Increased size */
             font-weight: 950;
             /* Extra bold */
-            color: #2ecc71;
+            color: #ccff00;
+            /* Lime */
             white-space: nowrap;
             opacity: 0;
             filter: blur(10px);
             z-index: 3;
-            text-shadow: 0 0 20px rgba(46, 204, 113, 0.8);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8), 0 0 25px rgba(0, 100, 0, 0.9);
+            /* Green & Dark Green Glow */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -546,33 +548,34 @@
             left: 20px;
             top: 50%;
             transform: translateY(-50%) scale(0.5);
-            width: 25px;
-            height: 25px;
-            background: radial-gradient(circle, #fff 10%, rgba(255, 255, 200, 0.9) 30%, rgba(46, 204, 113, 0.5) 60%, transparent 80%);
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ffffff 30%, rgba(255, 255, 255, 0.9) 50%, transparent 70%);
             border-radius: 50%;
             opacity: 0;
             z-index: 20;
             pointer-events: none;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 60px rgba(255, 255, 255, 1);
+            will-change: transform, opacity;
         }
 
-        /* Optimized Price Animation (No Blurs/Heavy Filters) */
+        /* Optimized Price Animation (Hypnotic White Flash) */
         @keyframes bombBlast {
 
             0%,
-            25% {
+            20% {
                 opacity: 0;
-                transform: translateY(-50%) scale(0.5);
+                transform: translateY(-50%) scale(0.1);
             }
 
-            28% {
+            22% {
                 opacity: 1;
-                transform: translateY(-50%) scale(1.5);
+                transform: translateY(-50%) scale(2);
             }
 
             35% {
                 opacity: 0;
-                transform: translateY(-50%) scale(2);
+                transform: translateY(-50%) scale(15);
             }
 
             100% {
@@ -598,6 +601,7 @@
         }
 
         /* Simplified Loops: Opacity + Transform only */
+        /* Simplified Loops: Opacity + Transform only */
         @keyframes strikeLoop {
             0% {
                 width: 0;
@@ -609,7 +613,7 @@
                 opacity: 1;
             }
 
-            30% {
+            25% {
                 width: 95%;
                 opacity: 0;
             }
@@ -631,12 +635,12 @@
                 transform: scale(1);
             }
 
-            30% {
+            25% {
                 opacity: 0;
+                /* Vanishes exactly when Real Price appears */
                 transform: scale(1.1);
             }
 
-            /* Basic fade out zoom */
             90% {
                 opacity: 0;
                 transform: scale(1);
@@ -648,74 +652,82 @@
             }
         }
 
-        @keyframes realLoop {
-            0% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            25% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            35% {
-                opacity: 1;
-                transform: scale(1.1);
-            }
-
-            /* Pop in */
-            45% {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            90% {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-        }
-
+        /* Note: There was a duplicate realLoop definition in previous versions, this replaces both */
+        /* Note: There was a duplicate realLoop definition in previous versions, this replaces both */
         @keyframes realLoop {
             0% {
                 opacity: 0;
                 filter: blur(10px);
-                transform: scale(0.85);
+                transform: scale(0.5) rotate(-4deg);
+                color: #ccff00;
+                /* Start Lime */
             }
 
             25% {
                 opacity: 0;
+                /* Invisible while Fake Price is shown */
                 filter: blur(10px);
-                transform: scale(0.85);
+                transform: scale(0.5) rotate(-4deg);
             }
 
-            40% {
+            /* ENTRIES: GLITCH & CHANGE TO VIVID GREEN */
+            26% {
                 opacity: 1;
+                color: #ccff00;
+                /* Lime */
+                transform: scale(1.3) rotate(-8deg);
+                /* Extra tilt glitch */
+                text-shadow: -4px 0 #ff0000, 4px 0 #0000ff;
+                /* Glitch */
                 filter: blur(0);
-                transform: scale(1);
+            }
+
+            28% {
+                color: #00ff00;
+                /* To Vivid Green */
+                transform: scale(1.1) rotate(-4deg);
+                /* Stabilize Tilted */
+                text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+            }
+
+            /* Heartbeat Pulse (Vivid Green) - Maintain Tilt */
+            45% {
+                transform: scale(1.2) rotate(-4deg);
+                text-shadow: 0 0 35px #00ff00;
+            }
+
+            55% {
+                transform: scale(1.1) rotate(-4deg);
+                text-shadow: 0 0 15px #00ff00;
             }
 
             65% {
-                opacity: 1;
-                filter: blur(0);
-                transform: scale(1.1);
+                transform: scale(1.2) rotate(-4deg);
+                text-shadow: 0 0 35px #00ff00;
             }
 
-            90% {
+            75% {
+                transform: scale(1.1) rotate(-4deg);
+                text-shadow: 0 0 15px #00ff00;
+            }
+
+            85% {
+                transform: scale(1.2) rotate(-4deg);
+                text-shadow: 0 0 35px #00ff00;
+            }
+
+            /* Hold visibility longer */
+            95% {
                 opacity: 1;
+                transform: scale(1.15) rotate(-4deg);
+                color: #00ff00;
                 filter: blur(0);
-                transform: scale(1);
             }
 
             100% {
                 opacity: 0;
-                filter: blur(10px);
-                transform: scale(0.85);
+                transform: scale(1.5) rotate(-4deg);
+                filter: blur(20px);
             }
         }
 
