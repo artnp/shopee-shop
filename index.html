@@ -1687,6 +1687,14 @@
                     displayProducts = [...allProducts]; // Default random or sorted
                 }
 
+                if (!keyword && targetId) {
+                    const idx = displayProducts.findIndex(p => String(p.id) === String(targetId));
+                    if (idx > -1) {
+                        const [item] = displayProducts.splice(idx, 1);
+                        displayProducts.unshift(item);
+                    }
+                }
+
                 renderList();
                 renderSavedBar(); // Re-render to update images from fetched data
 
@@ -1774,11 +1782,13 @@
 
         function handleSearch(val) { filterProducts(val); }
 
+        let currentRenderIndex = 0;
+        const RENDER_BATCH_SIZE = 5; // Load smaller chunks for mobile stability
+
         function renderList() {
             const container = document.getElementById('container');
             container.innerHTML = '';
-            // If RecBar exists, make sure to hide if suggestions shown? No, user wants it back.
-            // renderRecBar(); // Can be called here too if filtering changes recs
+            currentRenderIndex = 0;
 
             if (window.isShowingSuggestions) {
                 const msg = document.createElement('div');
@@ -1786,11 +1796,19 @@
                 msg.innerHTML = "✨ ไม่พบที่ค้นหา แต่ฉันขอแนะนำสิ่งนี้แทน!";
                 container.appendChild(msg);
             }
-            displayProducts.forEach(v => appendVideo(v));
-            setupObserver();
+
+            initObserver();
+            appendNextBatch();
             updateAllMuteIcons();
             updateNavState();
+        }
 
+        function appendNextBatch() {
+            if (currentRenderIndex >= displayProducts.length) return;
+
+            const nextBatch = displayProducts.slice(currentRenderIndex, currentRenderIndex + RENDER_BATCH_SIZE);
+            nextBatch.forEach(v => appendVideo(v));
+            currentRenderIndex += nextBatch.length;
         }
 
         function appendVideo(v) {
@@ -1924,15 +1942,14 @@
                 }
             };
 
-            // Safe event listener for Save button
-            const saveBtn = div.querySelector(`#btn-save-${v.id}`);
             if (saveBtn) saveBtn.onclick = (e) => toggleSave(v.id, v.title, e);
 
             container.appendChild(div);
+            if (window.observer) window.observer.observe(div);
         }
 
-        function setupObserver() {
-            if (window.observer) window.observer.disconnect();
+        function initObserver() {
+            if (window.observer) return;
 
             const options = { root: document.getElementById('container'), threshold: 0.6 };
             window.observer = new IntersectionObserver((entries) => {
@@ -2002,6 +2019,14 @@
                         if (window.nextToastTimeout) clearTimeout(window.nextToastTimeout);
                         window.nextToastTimeout = setTimeout(showRandomToast, 5000);
 
+                        // Infinite Scroll Trigger
+                        const allItems = document.querySelectorAll('.short-item');
+                        const thresholdIndex = allItems.length - 2;
+                        if (allItems[thresholdIndex] &&
+                            (entry.target === allItems[thresholdIndex] || entry.target === allItems[allItems.length - 1])) {
+                            appendNextBatch();
+                        }
+
                     } else {
                         video.pause();
                         video.currentTime = 0;
@@ -2010,8 +2035,6 @@
                     }
                 });
             }, options);
-
-            document.querySelectorAll('.short-item').forEach(item => window.observer.observe(item));
         }
 
         function loadVideo(v) {
@@ -2406,9 +2429,16 @@
             window.lastMouseY = e.clientY;
         });
 
+        // Throttled Scroll Particles (Performance Fix)
+        let isScrollParticleActive = false;
         document.getElementById('container').addEventListener('scroll', () => {
-            // Spawn PROMINENT particles during scroll
-            for (let i = 0; i < 12; i++) {
+            if (isScrollParticleActive) return;
+            isScrollParticleActive = true;
+
+            setTimeout(() => { isScrollParticleActive = false; }, 150); // Throttle 150ms
+
+            // Spawn fewer particles
+            for (let i = 0; i < 3; i++) {
                 particles.push(new Particle(Math.random() * canvas.width, canvas.height, 'scroll'));
             }
         });
