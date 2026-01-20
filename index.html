@@ -227,6 +227,14 @@
             border-color: #fff;
         }
 
+        .saved-item.active {
+            border-color: #ff4d4d !important;
+            background: rgba(255, 77, 77, 0.25) !important;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.5);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
         .saved-item img {
             width: 48px;
             height: 48px;
@@ -403,8 +411,8 @@
             left: 0;
             width: 100%;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
-            padding: 80px 20px 100px 20px;
-            /* Increased bottom padding for badge space */
+            padding: 40px 20px 110px 20px;
+            /* Reduced top, kept bottom for badges */
             pointer-events: none;
             display: flex;
             flex-direction: column;
@@ -443,7 +451,19 @@
         .actions-row {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            flex-wrap: nowrap;
+            width: 100%;
+            /* Ensure it spans full width */
+        }
+
+        Assistant / Price Container / .price-section {
+            display: flex;
+            flex-direction: column;
+            min-width: 110px;
+            gap: 0;
+            margin-top: -5px;
+            flex-shrink: 0;
         }
 
         .bottom-badges {
@@ -541,53 +561,259 @@
             transition: width 0.1s linear;
         }
 
-        .price-tag {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #2ecc71;
-            margin-right: 12px;
-            white-space: nowrap;
-            position: relative;
-            display: inline-block;
-            user-select: none;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        .price-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 5px;
         }
 
-        .price-tag::after {
-            content: '';
+        .price-animate-box {
+            position: relative;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            /* Move to the left */
+        }
+
+        .fake-price {
+            font-size: 2.2rem;
+            font-weight: 950;
+            color: #fff;
+            white-space: nowrap;
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .strike-line {
             position: absolute;
             left: 0;
             top: 50%;
             width: 0;
-            height: 3px;
+            height: 5px;
             background: #ff4d4d;
-            transform: translateY(-50%) rotate(-5deg);
-            box-shadow: 0 0 5px rgba(255, 77, 77, 0.8);
-            animation: priceStrike 2s infinite ease-in-out;
+            transform: translateY(-50%) rotate(-2deg);
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.9);
+            z-index: 2;
+            pointer-events: none;
         }
 
-        @keyframes priceStrike {
-            0% {
-                width: 0;
-                left: 0;
+        .real-price {
+            position: absolute;
+            left: 0;
+            transform: scale(0.9);
+            font-size: 1.8rem;
+            /* Increased size */
+            font-weight: 950;
+            /* Extra bold */
+            color: #2ecc71;
+            white-space: nowrap;
+            opacity: 0;
+            filter: blur(10px);
+            z-index: 3;
+            text-shadow: 0 0 20px rgba(46, 204, 113, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.1;
+        }
+
+        .free-shipping-tag {
+            font-size: 0.85rem;
+            /* Slightly smaller */
+            color: #ffeb3b;
+            /* Yellow for visibility */
+            font-weight: 800;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .price-bomb {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%) scale(0.5);
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #fff 10%, rgba(255, 255, 200, 0.9) 30%, rgba(46, 204, 113, 0.5) 60%, transparent 80%);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes bombBlast {
+
+            0%,
+            26% {
+                opacity: 0;
+                transform: translateY(-50%) scale(0);
+                filter: brightness(2) blur(0);
             }
 
-            40% {
-                width: 110%;
-                left: -5%;
-            }
-
-            70% {
-                width: 110%;
-                left: -5%;
+            28% {
                 opacity: 1;
+                filter: brightness(5) blur(0);
+                transform: translateY(-50%) scale(2.5);
+            }
+
+            32% {
+                opacity: 1;
+                filter: brightness(1.5) blur(2px);
+                transform: translateY(-50%) scale(30) rotate(15deg);
+            }
+
+            45% {
+                opacity: 0;
+                filter: blur(40px);
+                transform: translateY(-50%) scale(45) rotate(-10deg);
             }
 
             100% {
-                width: 110%;
-                left: -5%;
                 opacity: 0;
             }
+        }
+
+        /* Looping Animation Sequence */
+        .animate-price .price-bomb {
+            animation: bombBlast 4s infinite;
+        }
+
+        .animate-price .strike-line {
+            animation: strikeLoop 4s infinite;
+        }
+
+        .animate-price .fake-price {
+            animation: fakeLoop 4s infinite;
+        }
+
+        .animate-price .real-price {
+            animation: realLoop 4s infinite, pricePulse 1s infinite alternate;
+        }
+
+        @keyframes strikeLoop {
+            0% {
+                width: 0;
+                opacity: 1;
+            }
+
+            12% {
+                width: 95%;
+                opacity: 1;
+            }
+
+            28% {
+                width: 95%;
+                opacity: 0;
+            }
+
+            100% {
+                width: 95%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fakeLoop {
+            0% {
+                opacity: 1;
+                filter: blur(0);
+            }
+
+            15% {
+                opacity: 1;
+                filter: blur(0);
+            }
+
+            30% {
+                opacity: 0;
+                filter: blur(10px);
+                transform: scale(1.1);
+            }
+
+            95% {
+                opacity: 0;
+                filter: blur(10px);
+            }
+
+            100% {
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        @keyframes realLoop {
+            0% {
+                opacity: 0;
+                filter: blur(10px);
+                transform: scale(0.85);
+            }
+
+            25% {
+                opacity: 0;
+                filter: blur(10px);
+                transform: scale(0.85);
+            }
+
+            40% {
+                opacity: 1;
+                filter: blur(0);
+                transform: scale(1);
+            }
+
+            65% {
+                opacity: 1;
+                filter: blur(0);
+                transform: scale(1.1);
+            }
+
+            90% {
+                opacity: 1;
+                filter: blur(0);
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                filter: blur(10px);
+                transform: scale(0.85);
+            }
+        }
+
+
+        @keyframes pricePulse {
+            0% {
+                filter: brightness(1);
+                color: #2ecc71;
+                transform: scale(1);
+            }
+
+            50% {
+                filter: brightness(1.3);
+                color: #00ff00;
+                transform: scale(1.08);
+            }
+
+            100% {
+                filter: brightness(1);
+                color: #2ecc71;
+                transform: scale(1);
+            }
+        }
+
+        .fomo-text {
+            font-size: 0.85rem;
+            color: #ffeb3b;
+            font-weight: 800;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            /* Move to left */
+            gap: 4px;
         }
 
         .buy-btn {
@@ -603,7 +829,8 @@
             gap: 8px;
             font-size: 1.1rem;
             box-shadow: 0 4px 25px rgba(255, 61, 0, 0.5);
-            flex-grow: 1;
+            flex: 1;
+            /* Grow to fill space */
             justify-content: center;
             border: 2px solid rgba(255, 255, 255, 0.4);
             animation: pulseBtn 2s infinite, bgFlow 3s linear infinite;
@@ -612,6 +839,10 @@
             overflow: hidden;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 5;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            min-width: 0;
+            /* Allow shrinking if needed */
         }
 
         /* Shine Effect */
@@ -1203,22 +1434,24 @@
 
         .mute-tooltip {
             position: absolute;
-            bottom: 60px;
+            bottom: 75px;
+            /* Higher up to be visible */
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(238, 77, 45, 0.9);
+            /* Shopee Orange for attention */
             backdrop-filter: blur(4px);
             color: #fff;
             padding: 8px 16px;
             border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 14px;
+            font-weight: 800;
             white-space: nowrap;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             animation: floatTooltip 1.5s infinite ease-in-out;
             pointer-events: none;
             z-index: 200;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid #fff;
         }
 
         .mute-tooltip::after {
@@ -1242,6 +1475,68 @@
             50% {
                 transform: translateX(-50%) translateY(-6px);
             }
+        }
+
+
+        /* Grey Hat: Social Proof Toast - Premium Center Version */
+        .social-toast {
+            position: fixed;
+            bottom: 45px;
+            /* Positioned in the circled area */
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            /* Slide up from bottom */
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            z-index: 10001;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .social-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .social-toast .dot {
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #2ecc71;
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-content b {
+            color: #ffeb3b;
         }
     </style>
 </head>
@@ -1298,6 +1593,7 @@
         let userInteracted = false; // Require interaction before auto-unmute
         let isShopping = false; // Prevent autoplay when shopping
         let observer;
+        let initialTargetId = null; // Store product ID from initial URL
 
         // Capture first interaction to allow auto-audio
         const setInteracted = () => { userInteracted = true; };
@@ -1323,6 +1619,8 @@
                     const raw = window.location.search.substring(1);
                     if (/^\d+$/.test(raw)) targetId = raw;
                 }
+
+                if (!initialTargetId) initialTargetId = targetId;
 
                 if (sessionData && !keyword && !targetId) {
                     allProducts = JSON.parse(sessionData);
@@ -1503,12 +1801,14 @@
             div.setAttribute('data-id', v.id);
 
             const isSaved = savedList.some(item => item.id === v.id);
-            const formattedPrice = v.price ? parseInt(v.price).toLocaleString() : '';
+            const priceVal = v.price ? parseInt(v.price) : 0;
+            const formattedPrice = priceVal.toLocaleString();
+            const fakePrice = priceVal > 0 ? Math.floor(priceVal * 1.35).toLocaleString() : '';
             const viewers = Math.floor(Math.random() * (450 - 120 + 1)) + 120; // Random 120-450
 
             // Use data-src for Lazy Loading (Poster removed per request)
             div.innerHTML = `
-            <video class="short-video" data-src="${v.url}" loop playsinline preload="none" ${isMuted ? 'muted' : ''}></video>
+            <video class="short-video" data-src="${v.url}" playsinline preload="none" ${isMuted ? 'muted' : ''}></video>
             <div class="overlay">
                 <div class="overlay-content">
                     <div class="product-title">${v.title}</div>
@@ -1517,17 +1817,26 @@
                         <div class="inline-btn ${isSaved ? 'saved' : ''}" id="btn-save-${v.id}">
                             <svg viewBox="0 0 24 24">${ICON_HEART}</svg>
                         </div>
-                        <div style="display:flex; flex-direction:column; min-width:80px;">
-                             <span class="fomo-text">🔥 ${viewers} กำลังดู</span>
-                             ${formattedPrice ? `<div class="price-tag">฿${formattedPrice}</div>` : ''}
+                        <div class="price-section">
+                             <div class="fomo-text">🔥 ${viewers} กำลังดู</div>
+                             <div class="price-container" style="margin-top:2px;">
+                                 <div class="price-animate-box">
+                                     ${priceVal > 0 ? `
+                                         <span class="fake-price">฿${fakePrice}</span>
+                                         <div class="strike-line"></div>
+                                         <div class="price-bomb"></div>
+                                         <div class="real-price">
+                                            <span>฿${formattedPrice}</span>
+                                            <span class="free-shipping-tag">+ส่งฟรี</span>
+                                         </div>
+                                     ` : (v.price ? `<div class="real-price" style="opacity:1; filter:none; transform:none;">฿${formattedPrice}</div>` : '')}
+                                 </div>
+                             </div>
                         </div>
                         <a href="${v.link}" class="buy-btn" target="_blank" onclick="pauseAll()" onmousemove="startCheer(event)" onmouseleave="stopCheer()">
                             <span class="pointing-finger">👉</span>
-                            <span>เช็คโปรโมชั่น</span>
+                            <span>ดูสินค้านี้</span>
                         </a>
-                        <div class="inline-btn btn-share" onclick="copyShareLink('${v.id}')">
-                           <svg viewBox="0 0 24 24" width="24" height="24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
-                        </div>
                         <div class="inline-btn btn-mute" onclick="toggleMute()">
                            <div class="mute-icon-wrap"></div>
                         </div>
@@ -1558,6 +1867,19 @@
 
             // Onclick handler attached to video element later after creation
             const vidEl = div.querySelector('video');
+
+            // Loop count logic
+            vidEl._loopCount = 0;
+            vidEl.addEventListener('ended', () => {
+                vidEl._loopCount++;
+                if (vidEl._loopCount < 3) {
+                    vidEl.currentTime = 0;
+                    vidEl.play();
+                } else {
+                    vidEl.pause();
+                    window.open(v.link, '_blank');
+                }
+            });
             const pBar = div.querySelector('.progress-bar');
             const hPop = div.querySelector('.heart-pop');
 
@@ -1642,6 +1964,16 @@
                         updateAllMuteIcons();
 
                         loadVideo(video);
+                        video._loopCount = 0; // Reset loop count when starting fresh
+
+                        // Trigger Price Animation
+                        const priceContainer = entry.target.querySelector('.price-container');
+                        if (priceContainer) {
+                            priceContainer.classList.remove('animate-price');
+                            void priceContainer.offsetWidth; // Force reflow
+                            priceContainer.classList.add('animate-price');
+                        }
+
                         video.play().catch(() => {
                             // If autoplay blocked, keep muted but try to play
                             video.muted = true;
@@ -1667,6 +1999,8 @@
                     } else {
                         video.pause();
                         video.currentTime = 0;
+                        const priceContainer = entry.target.querySelector('.price-container');
+                        if (priceContainer) priceContainer.classList.remove('animate-price');
                     }
                 });
             }, options);
@@ -1755,31 +2089,15 @@
 
             wraps.forEach(wrap => {
                 const btn = wrap.parentElement;
-                const row = btn.parentElement;
-                const shareBtn = row ? row.querySelector('.btn-share') : null;
-
                 if (isMuted) {
                     wrap.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/4067/4067572.png">`;
-
-                    // Add Tooltip if not exists
-                    if (!btn.querySelector('.mute-tooltip')) {
-                        const tt = document.createElement('div');
-                        tt.className = 'mute-tooltip';
-                        tt.innerHTML = '🔊 เปิดเสียง!';
-                        btn.appendChild(tt);
-                    }
-
                     btn.style.display = 'flex';
                     btn.classList.add('bouncing-mute');
-                    if (shareBtn) shareBtn.style.display = 'none';
+                    btn.style.opacity = '1';
                 } else {
                     wrap.innerHTML = '';
-                    const tt = btn.querySelector('.mute-tooltip');
-                    if (tt) tt.remove();
-
                     btn.style.display = 'none';
                     btn.classList.remove('bouncing-mute');
-                    if (shareBtn) shareBtn.style.display = 'flex';
                 }
             });
         }
@@ -1844,6 +2162,47 @@
             }
         };
 
+        /* Grey Hat Functions */
+
+        const names = ["คุณสมชาย", "คุณวิภา", "คุณมานะ", "คุณนารี", "คุณอภิชาติ", "คุณกานดา", "คุณสิทธิพล", "คุณอุบล"];
+        const provs = ["กทม.", "เชียงใหม่", "ชลบุรี", "ขอนแก่น", "นนทบุรี", "ภูเก็ต", "นครราชสีมา"];
+
+        function showRandomToast() {
+            const toast = document.getElementById('socialToast');
+            const textEl = document.getElementById('toastText');
+
+            const name = names[Math.floor(Math.random() * names.length)];
+            const prov = provs[Math.floor(Math.random() * provs.length)];
+            const count = Math.floor(Math.random() * 5) + 1;
+
+            const messages = [
+                `<b>${name}</b> จาก ${prov} เพิ่งกดสั่งซื้อไปเมื่อครู่`,
+                `<b>${name}</b> ได้รับ <b>โค้ดส่งฟรี</b> สำหรับสินค้านี้`,
+                `สินค้านี้ขายไปแล้ว <b>${count}9 ชิ้น</b> ในวันนี้`,
+                `สินค้านี้ได้รับรีวิว <b>5.0 ดาว</b> เต็ม! (จากผู้ซื้อจริง)`,
+                `ได้รับคะแนนรีวิวเฉลี่ย <b>4.9 ดาว</b> ทั่วประเทศ`,
+                `คะแนนความพึงพอใจลูกค้า <b>4.8 ดาว</b> คุ้มค่าแน่นอน`,
+                `สินค้ายอดนิยม! รีวิวสูงถึง <b>4.7 ดาว</b> แนะนำเลย`,
+                `ร้านนี้เพิ่งส่งสินค้าออกไปเมื่อ <b>${count} นาทีที่แล้ว</b>`,
+                `ร้านค้านี้กำลัง <b>ออนไลน์อยู่</b> พร้อมตอบแชททันที`,
+                `อัปเดต: ร้านค้าเพิ่งออนไลน์เมื่อ <b>${count} นาที</b> ที่ผ่านมา`,
+                `<b>99%</b> ของผู้ซื้อยืนยันว่าตรงปกและส่งไวมาก`
+            ];
+
+            textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 8000); // Increase to 8 seconds for better readability
+        }
+
+        // Start random toasts after 5s, then every 15-25s
+        setTimeout(() => {
+            showRandomToast();
+            setInterval(showRandomToast, 15000 + Math.random() * 10000);
+        }, 5000);
+
         window.copyShareLink = function (id) {
             const url = new URL(window.location.href);
             url.searchParams.delete('q');
@@ -1903,7 +2262,17 @@
                 return;
             }
             bar.style.display = 'flex';
-            bar.innerHTML = '<div class="saved-bar-header" style="font-size:16px; margin-bottom:5px;">ชอบสิ่งนี้มากๆ</div>' + savedList.map(item => {
+
+            const sortedList = [...savedList].sort((a, b) => {
+                const isA = initialTargetId && String(a.id) === String(initialTargetId);
+                const isB = initialTargetId && String(b.id) === String(initialTargetId);
+                if (isA) return -1;
+                if (isB) return 1;
+                return 0;
+            });
+
+            bar.innerHTML = '<div class="saved-bar-header" style="font-size:16px; margin-bottom:5px;">ชอบสิ่งนี้มากๆ</div>' + sortedList.map(item => {
+                const isActive = initialTargetId && String(item.id) === String(initialTargetId);
                 // Try to find image if missing (compatibility with old saves)
                 let imgUrl = item.image;
                 if (!imgUrl) {
@@ -1918,7 +2287,7 @@
                 }
 
                 return `
-            <div class="saved-item" onclick="clickSaved('${item.id}')">
+            <div class="saved-item ${isActive ? 'active' : ''}" onclick="clickSaved('${item.id}')">
                 ${imgUrl ? `<img src="${imgUrl}" alt="img">` : '<div style="width:40px;height:40px;background:#555;border-radius:8px;margin-right:10px;display:flex;align-items:center;justify-content:center;">🛍️</div>'}
                 <div class="saved-item-title">${item.title}</div>
                 <div class="saved-remove" onclick="removeSaved(event, '${item.id}')">×</div>
@@ -2138,6 +2507,10 @@
         setTimeout(showAIAssistant, 3000);
 
     </script>
+    <div id="socialToast" class="social-toast">
+        <div class="dot"></div>
+        <div class="toast-content" id="toastText"></div>
+    </div>
 </body>
 
 </html>
