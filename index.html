@@ -26,7 +26,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Aurora Background Effect (Default) */
+        /* Aurora Background Effect (Static for Performance) */
         body::before {
             content: "";
             position: absolute;
@@ -34,96 +34,25 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background:
-                radial-gradient(circle at 15% 50%, rgba(0, 255, 127, 0.1), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(200, 50, 255, 0.1), transparent 25%);
-            filter: blur(50px);
+            background: radial-gradient(circle at 15% 50%, rgba(0, 255, 127, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(200, 50, 255, 0.05), transparent 25%);
             z-index: 0;
-            animation: auroraMove 15s infinite alternate;
-            transition: opacity 1s ease;
             pointer-events: none;
         }
 
-        /* Beat Mode Override (Triggered when sound is ON) */
+        /* Simplified Beat Mode */
         body.beat-mode::before {
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center,
-                    #000000 0%,
-                    #1a0505 20%,
-                    #250000 40%,
-                    #1a0505 70%,
-                    #000000 100%);
-            filter: blur(40px);
-            animation: syncedBeat 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+            background: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
+            opacity: 0.5;
+            animation: simplePulse 0.6s infinite alternate;
         }
 
-        body::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 1;
-            pointer-events: none;
-            transition: background 0.5s ease;
-        }
-
-        body.beat-mode::after {
-            background: radial-gradient(circle at center, rgba(255, 0, 0, 0.2), transparent 70%);
-            mix-blend-mode: overlay;
-            animation: syncedOverlay 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
-        }
-
-        @keyframes syncedBeat {
-            0% {
-                transform: scale(1);
-                opacity: 0.5;
+        @keyframes simplePulse {
+            from {
+                opacity: 0.3;
             }
 
-            15% {
-                transform: scale(1.03);
-                opacity: 0.6;
-            }
-
-            30% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-
-            45% {
-                transform: scale(1.2);
-                opacity: 0.8;
-            }
-
-            60% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-        }
-
-        @keyframes syncedOverlay {
-            0% {
-                opacity: 0;
-            }
-
-            45% {
-                opacity: 0.4;
-            }
-
-            100% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes auroraMove {
-
-            100% {
-                transform: scale(1);
+            to {
                 opacity: 0.6;
             }
         }
@@ -159,32 +88,11 @@
             z-index: 50;
             overflow-y: auto;
             scrollbar-width: none;
-            background: linear-gradient(-45deg, rgba(82, 33, 209, 0.7), rgba(220, 31, 255, 0.6), rgba(0, 212, 255, 0.6), rgba(255, 102, 0, 0.5));
-            background-size: 400% 400%;
-            animation: vibrantMove 10s ease infinite;
-            backdrop-filter: blur(20px);
+            background: rgba(82, 33, 209, 0.85);
+            /* Solid semi-transparent */
             padding: 18px;
             border-radius: 28px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
-        }
-
-        .saved-bar::-webkit-scrollbar {
-            display: none;
-        }
-
-        @keyframes vibrantMove {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .saved-bar-header {
@@ -209,16 +117,15 @@
         .saved-item {
             width: 100%;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(40, 40, 40, 0.9);
             border-radius: 24px;
             display: flex;
             align-items: center;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
             flex-shrink: 0;
             position: relative;
-            backdrop-filter: blur(5px);
         }
 
         .saved-item:hover {
@@ -388,6 +295,11 @@
             backface-visibility: hidden;
             -webkit-transform: translate3d(0, 0, 0);
             transform: translate3d(0, 0, 0);
+
+            /* Performance Booster for Chrome */
+            content-visibility: auto;
+            contain-intrinsic-size: 100vh;
+            contain: strict;
         }
 
         video {
@@ -484,8 +396,8 @@
             align-items: center;
             gap: 6px;
             padding: 5px 12px;
-            background: rgba(0, 10, 20, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 10, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 50px;
             font-size: 0.68rem;
             color: #b0bec5;
@@ -1851,7 +1763,7 @@
                                  </div>
                              </div>
                         </div>
-                        <a href="${v.link}" class="buy-btn" target="_blank" onclick="pauseAll()" onmousemove="startCheer(event)" onmouseleave="stopCheer()">
+                        <a href="${v.link}" class="buy-btn" target="_blank" onclick="pauseAll()">
                             <span class="pointing-finger">👉</span>
                             <span>ดูสินค้านี้</span>
                         </a>
@@ -1942,6 +1854,8 @@
                 }
             };
 
+            // Safe event listener for Save button
+            const saveBtn = div.querySelector(`#btn-save-${v.id}`);
             if (saveBtn) saveBtn.onclick = (e) => toggleSave(v.id, v.title, e);
 
             container.appendChild(div);
@@ -2053,12 +1967,16 @@
             const currentIndex = allItems.indexOf(currentItem);
 
             allItems.forEach((item, index) => {
-                // Keep only range of [current-2, current+2] loaded
-                if (Math.abs(index - currentIndex) > 2) {
+                // Keep only range of [current-1, current+1] loaded for strict mobile memory
+                const dist = Math.abs(index - currentIndex);
+                if (dist > 1) {
                     const v = item.querySelector('video');
-                    if (v && v.getAttribute('src')) {
-                        v.removeAttribute('src'); // Unload source
-                        v.load(); // Reset player
+                    // Only act if it actually has a source to clear
+                    if (v && (v.getAttribute('src') || v.src)) {
+                        v.pause();
+                        v.removeAttribute('src'); // Remove attribute
+                        v.src = ""; // Explicitly clear property
+                        v.load(); // Force detach
                     }
                 }
             });
@@ -2329,119 +2247,8 @@
 
 
         init();
-        // --- Particle Magic Logic ---
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor(x, y, type = 'normal') {
-                this.x = x;
-                this.y = y;
-
-                if (type === 'scroll') {
-                    this.size = Math.random() * 3 + 1; // Smaller
-                    this.speedX = Math.random() * 4 - 2;
-                    this.speedY = Math.random() * -10 - 4;
-                    this.color = `hsl(${Math.random() * 360}, 60%, 75%)`; // Less saturated
-                    this.alpha = 0.4; // Dimmer
-                    this.decay = 0.015;
-                } else if (type === 'cheer') {
-                    this.size = Math.random() * 3 + 1.5;
-                    this.speedX = Math.random() * 5 - 2.5;
-                    this.speedY = Math.random() * -12 - 6; // Slower speed
-                    this.color = `hsl(${Math.random() * 60 + 10}, 100%, 75%)`;
-                    this.alpha = 0.9;
-                    this.decay = 0.025; // Faster decay to stop around midpoint
-                } else {
-                    this.size = Math.random() * 2 + 1;
-                    this.speedX = Math.random() * 2 - 1;
-                    this.speedY = Math.random() * -3 - 1;
-                    this.color = `hsl(${Math.random() * 60 + 180}, 60%, 70%)`;
-                    this.alpha = 0.3;
-                    this.decay = 0.005;
-                }
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.alpha -= (this.decay || 0.01);
-            }
-            draw() {
-                ctx.globalAlpha = this.alpha;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function handleParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                if (particles[i].alpha <= 0) {
-                    particles.splice(i, 1);
-                    i--;
-                }
-            }
-            requestAnimationFrame(handleParticles);
-        }
-        handleParticles();
-
-        // --- Cheer Effect (Button Hover) ---
-        let cheerInterval;
-        window.startCheer = function (e) {
-            if (cheerInterval) return; // Prevent multiple intervals
-
-            // Burst immediately huge amount
-            for (let i = 0; i < 30; i++) particles.push(new Particle(e.clientX, e.clientY, 'cheer'));
-
-            cheerInterval = setInterval(() => {
-                // Spawn wave from bottom
-                for (let i = 0; i < 8; i++) {
-                    particles.push(new Particle(Math.random() * canvas.width, canvas.height, 'cheer'));
-                }
-                // Spark from mouse
-                if (window.lastMouseX) {
-                    for (let k = 0; k < 3; k++) {
-                        particles.push(new Particle(window.lastMouseX, window.lastMouseY, 'cheer'));
-                    }
-                }
-            }, 25); // Fast tick
-        }
-
-        window.stopCheer = function () {
-            clearInterval(cheerInterval);
-            cheerInterval = null;
-        }
-
-        document.addEventListener('mousemove', (e) => {
-            window.lastMouseX = e.clientX;
-            window.lastMouseY = e.clientY;
-        });
-
-        // Throttled Scroll Particles (Performance Fix)
-        let isScrollParticleActive = false;
-        document.getElementById('container').addEventListener('scroll', () => {
-            if (isScrollParticleActive) return;
-            isScrollParticleActive = true;
-
-            setTimeout(() => { isScrollParticleActive = false; }, 150); // Throttle 150ms
-
-            // Spawn fewer particles
-            for (let i = 0; i < 3; i++) {
-                particles.push(new Particle(Math.random() * canvas.width, canvas.height, 'scroll'));
-            }
-        });
+        /* --- Particle System Removed for Performance --- */
+        /* JS logic for particles has been removed to prevent freezing on mobile devices. */
 
         // --- AI Assistant Logic ---
         const phrases = [
