@@ -1575,6 +1575,7 @@
         let isShopping = false; // Prevent autoplay when shopping
         let observer;
         let initialTargetId = null; // Store product ID from initial URL
+        let aiTimeout = null;
 
         // Capture first interaction to allow auto-audio
         const setInteracted = () => { userInteracted = true; };
@@ -2015,6 +2016,16 @@
                         video.currentTime = 0;
                         const priceContainer = entry.target.querySelector('.price-container');
                         if (priceContainer) priceContainer.classList.remove('animate-price');
+                    }
+
+                    // AI Assistant Reset on Change
+                    if (entry.isIntersecting) {
+                        if (aiTimeout) clearTimeout(aiTimeout);
+                        const aiWrap = document.getElementById('aiAssistant');
+                        if (aiWrap) aiWrap.classList.remove('visible');
+                        aiTimeout = setTimeout(() => {
+                            if (!window.isShopping) showAIAssistant();
+                        }, 20000);
                     }
                 });
             }, options);
@@ -2512,13 +2523,7 @@
             }, 5000); // Show for 5 seconds
         }
 
-        // Show every 15-25 seconds (checks isMuted internally)
-        setInterval(() => {
-            if (!window.isShopping) showAIAssistant();
-        }, 20000);
-
-        // Initial show after 20 seconds
-        setTimeout(showAIAssistant, 20000);
+        // Initial timer is handled by IntersectionObserver
 
     </script>
     <div id="socialToast" class="social-toast">
