@@ -1535,6 +1535,38 @@
         let allProducts = [];
         let displayProducts = [];
         let savedList = [];
+
+        function parseShopeePrice(val) {
+            if (!val) return 0;
+            if (typeof val === 'number') return val;
+            let s = String(val).replace(/,/g, '').trim().toLowerCase();
+
+            // Handle ranges like "100 - 200" -> keep the first number
+            if (s.includes('-')) {
+                s = s.split('-')[0].trim();
+            }
+
+            let multiplier = 1;
+            if (s.includes('พัน') || s.includes('k')) {
+                multiplier = 1000;
+                s = s.replace(/พัน|k/g, '');
+            } else if (s.includes('หมื่น')) {
+                multiplier = 10000;
+                s = s.replace(/หมื่น/g, '');
+            } else if (s.includes('แสน')) {
+                multiplier = 100000;
+                s = s.replace(/แสน/g, '');
+            } else if (s.includes('ล้าน') || s.includes('m')) {
+                multiplier = 1000000;
+                s = s.replace(/ล้าน|m/g, '');
+            }
+
+            // Remove everything except numbers and decimal point
+            s = s.replace(/[^\d.]/g, '');
+
+            const num = parseFloat(s);
+            return isNaN(num) ? 0 : Math.floor(num * multiplier);
+        }
         try {
             savedList = JSON.parse(localStorage.getItem('shopeeShortsSaved')) || [];
         } catch (e) { savedList = []; }
@@ -1768,7 +1800,7 @@
             div.setAttribute('data-id', v.id);
 
             const isSaved = savedList.some(item => item.id === v.id);
-            const priceVal = v.price ? parseInt(v.price) : 0;
+            const priceVal = parseShopeePrice(v.price);
             const formattedPrice = priceVal.toLocaleString();
             const fakePrice = priceVal > 0 ? Math.floor(priceVal * 1.33).toLocaleString() : '';
             const viewers = Math.floor(Math.random() * (450 - 120 + 1)) + 120; // Random 120-450
