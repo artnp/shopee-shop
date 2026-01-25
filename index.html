@@ -1899,8 +1899,9 @@
                     allProducts = rawData.filter(p => p.id && p.video).map(p => ({
                         id: String(p.id),
                         url: p.video,
-                        title: (p.tag && p.tag[0]) ? p.tag[0] : 'สินค้าแนะนำ',
-                        desc: (p.data_shopee) ? p.data_shopee.slice(0, 3).join(' | ') : '',
+                        title: (p.tag && Array.isArray(p.tag) && p.tag[0]) ? p.tag[0] : 'สินค้าแนะนำ',
+                        tags: Array.isArray(p.tag) ? p.tag : [],
+                        desc: (p.data_shopee && Array.isArray(p.data_shopee)) ? p.data_shopee.slice(0, 3).join(' | ') : '',
                         link: p.link_shopee || '#',
                         price: p.price || '',
                         image: (() => {
@@ -2022,6 +2023,26 @@
                     let score = 0;
                     const cleanTitle = p.title.toLowerCase().replace(/\s+/g, "");
                     const cleanDesc = p.desc.toLowerCase();
+
+                    // 0. TAG SEARCH (Priority: Search every word in tags)
+                    // Use 'keyword' to preserve spaces for splitting
+                    const searchTerms = keyword.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+                    let matchedTermsCount = 0;
+
+                    if (p.tags && Array.isArray(p.tags)) {
+                        searchTerms.forEach(term => {
+                            // Check if this term matches ANY tag (partial match within tag string)
+                            const isMatch = p.tags.some(t => typeof t === 'string' && t.toLowerCase().includes(term));
+                            if (isMatch) matchedTermsCount++;
+                        });
+                    }
+
+                    // If ALL terms are found in the tags, give it a massive boost
+                    if (matchedTermsCount === searchTerms.length && searchTerms.length > 0) {
+                        score += 5000;
+                    } else if (matchedTermsCount > 0) {
+                        score += matchedTermsCount * 200;
+                    }
 
                     // 1. Direct Inclusion (The classic)
                     if (cleanTitle.includes(cleanQuery)) score += 100;
