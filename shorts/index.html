@@ -1,0 +1,2756 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎞️ดูคลิปรีวิวสินค้าตัวนี้</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/2065/2065224.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: #000 !important;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* --- Tag Cloud (Recommended Stories) --- */
+        #storyBar {
+            position: fixed;
+            top: 75px;
+            /* Below Search Bar */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 400px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 5px 5px 10px 5px;
+            z-index: 900;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE */
+        }
+
+        #storyBar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .story-tag {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 4px 12px 4px 4px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            max-width: 150px;
+        }
+
+        .story-tag img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 6px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .story-tag span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .story-tag:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Static Background (No Aurora) */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Simplified Beat Mode */
+        body.beat-mode::before {
+            background: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
+            opacity: 0.5;
+            animation: simplePulse 0.6s infinite alternate;
+        }
+
+        @keyframes simplePulse {
+            from {
+                opacity: 0.3;
+            }
+
+            to {
+                opacity: 0.6;
+            }
+        }
+
+        /* --- Layout & Container --- */
+        .shorts-container {
+            height: 100%;
+            width: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .shorts-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- Premium Saved Bar (Vertical Card Style) --- */
+        .saved-bar {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            /* Align Left */
+            transform: none;
+            width: 200px;
+            /* Fixed width sidebar */
+            display: flex;
+            /* Ensure it is flex by default */
+            flex-direction: column;
+            gap: 8px;
+            z-index: 50;
+            background: #4a148c;
+            /* Purple Background */
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            max-height: 60vh;
+            overflow-y: auto;
+            white-space: normal;
+        }
+
+        .saved-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .saved-bar-header {
+            display: flex !important;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .saved-bar-header::before {
+            content: '✨';
+            margin-right: 5px;
+        }
+
+        .saved-item {
+            width: 100%;
+            height: auto;
+            min-height: 60px;
+            padding: 8px;
+            background: #2a2a2a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .saved-item:hover {
+            transform: scale(1.02);
+            background: #333;
+            border-color: #7c4dff;
+        }
+
+        .saved-item.active {
+            border: 2px solid #7c4dff !important;
+            background: #333 !important;
+            box-shadow: 0 0 15px rgba(124, 77, 255, 0.4);
+        }
+
+        .saved-item img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #000;
+        }
+
+        .saved-item-title {
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: bold;
+            line-height: 1.2;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+            text-align: left;
+            padding-right: 20px;
+            max-width: none;
+        }
+
+        .saved-remove {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            border: 2px solid #fff;
+            z-index: 10;
+        }
+
+        /* Adjust Story Bar (Recommended) to be below Saved Bar */
+        /* Adjust Story Bar (Recommended) to be below Saved Bar */
+        #storyBar {
+            position: fixed;
+            top: 80px;
+            /* Below Search Input */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 440px;
+            height: 50px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 0 5px;
+            z-index: 45;
+            white-space: nowrap;
+            /* Hide scrollbar */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #storyBar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .saved-remove {
+            position: absolute;
+            right: -5px;
+            top: -5px;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ff3b3b;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            border: 2px solid #fff;
+            z-index: 10;
+        }
+
+        .saved-remove:hover {
+            background: #ff0000;
+            transform: scale(1.1);
+        }
+
+
+
+
+        /* --- Nav Buttons --- */
+        .nav-buttons {
+            position: fixed;
+            right: 20px;
+            /* Adjust to stay at edge or follow rec-bar */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        @media (min-width: 1401px) {
+            .nav-buttons {
+                right: max(20px, calc(50% - 280px));
+            }
+        }
+
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            /* Subtle default */
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Removed individual backgrounds to keep it subtle */
+
+        /* Show color and pop only on click */
+        #btnUp:active {
+            background: linear-gradient(-45deg, #00d4ff, #8250ff);
+            transform: scale(1.3);
+            /* Pop effect */
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        }
+
+        #btnDown:active {
+            background: linear-gradient(-45deg, #dc1fff, #ff6600);
+            transform: scale(1.3);
+            /* Pop effect */
+            box-shadow: 0 0 20px rgba(220, 31, 255, 0.6);
+        }
+
+        .nav-btn:active {
+            filter: brightness(1.3);
+        }
+
+        .nav-btn.hidden {
+            opacity: 0;
+            visibility: hidden;
+            /* Absolute hiding */
+            pointer-events: none;
+            transform: scale(0.5) translateY(20px);
+        }
+
+        .nav-btn svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        /* --- Video Item --- */
+        .short-item {
+            height: 100%;
+            width: 100%;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Triple-Lock Clipping */
+            border-radius: 44px;
+            overflow: hidden !important;
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            mask-image: radial-gradient(white, black);
+            clip-path: inset(0 round 44px);
+            isolation: isolate;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+
+            /* Performance Booster for Chrome */
+            content-visibility: auto;
+            contain-intrinsic-size: 100vh;
+            contain: strict;
+        }
+
+        video {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            border-radius: 44px;
+            /* Aggressive internal clipping */
+            overflow: hidden;
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            mask-image: radial-gradient(white, black);
+            clip-path: inset(0 round 44px);
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        /* --- Overlay --- */
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
+            padding: 40px 20px 110px 20px;
+            /* Reduced top, kept bottom for badges */
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .overlay-content {
+            max-width: 600px;
+            margin: 0 auto;
+            pointer-events: auto;
+            width: 100%;
+        }
+
+        .product-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+            color: #fff;
+        }
+
+        .product-desc {
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- Actions --- */
+        .actions-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: nowrap;
+            width: 100%;
+            /* Ensure it spans full width */
+        }
+
+        Assistant / Price Container / .price-section {
+            display: flex;
+            flex-direction: column;
+            min-width: 110px;
+            gap: 0;
+            margin-top: -5px;
+            flex-shrink: 0;
+        }
+
+        .bottom-badges {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .safety-badge,
+        .fb-follow-btn-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: rgba(0, 10, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            font-size: 0.68rem;
+            color: #b0bec5;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            opacity: 0.85;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .fb-follow-btn-inline {
+            background: rgba(24, 119, 242, 0.25);
+            border-color: rgba(24, 119, 242, 0.4);
+            color: #fff;
+        }
+
+        .safety-badge:hover,
+        .fb-follow-btn-inline:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .fb-follow-btn-inline:hover {
+            background: rgba(24, 119, 242, 0.5);
+        }
+
+        .safety-badge svg,
+        .fb-follow-btn-inline svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .safety-badge svg {
+            fill: #40c4ff;
+        }
+
+        .fb-follow-btn-inline svg {
+            fill: #fff;
+        }
+
+        @keyframes fadeInSafe {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 0.85;
+                transform: translateY(0);
+            }
+        }
+
+        /* Neon Progress Bar */
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00f2ff, #bc13fe);
+            width: 0%;
+            box-shadow: 0 0 10px #00f2ff, 0 0 20px #bc13fe;
+            border-radius: 0 4px 4px 0;
+            transition: width 0.1s linear;
+        }
+
+        .price-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 5px;
+        }
+
+        .price-animate-box {
+            position: relative;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            /* Move to the left */
+        }
+
+        .fake-price {
+            font-size: 2.2rem;
+            font-weight: 950;
+            color: #fff;
+            white-space: nowrap;
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .strike-line {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 5px;
+            background: #ff4d4d;
+            transform: translateY(-50%) rotate(-2deg);
+            box-shadow: 0 0 12px rgba(255, 77, 77, 0.9);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .real-price {
+            position: absolute;
+            left: 0;
+            transform: scale(0.9);
+            font-size: 1.8rem;
+            /* Increased size */
+            font-weight: 950;
+            /* Extra bold */
+            /* Extra bold */
+            color: #00ff00;
+            /* Green */
+            white-space: nowrap;
+            opacity: 0;
+            filter: blur(10px);
+            z-index: 3;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8), 0 0 25px rgba(0, 100, 0, 0.9);
+            /* Green & Dark Green Glow */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.1;
+        }
+
+        .free-shipping-tag {
+            font-size: 0.85rem;
+            /* Slightly smaller */
+            color: #ffeb3b;
+            /* Yellow for visibility */
+            font-weight: 800;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .price-bomb {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%) scale(0.5);
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ffffff 30%, rgba(255, 255, 255, 0.9) 50%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 1);
+            will-change: transform, opacity;
+        }
+
+        /* Optimized Price Animation (Hypnotic White Flash) */
+        @keyframes bombBlast {
+
+            0%,
+            20% {
+                opacity: 0;
+                transform: translateY(-50%) scale(0.1);
+            }
+
+            22% {
+                opacity: 1;
+                transform: translateY(-50%) scale(2);
+            }
+
+            35% {
+                opacity: 0;
+                transform: translateY(-50%) scale(15);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .animate-price .price-bomb {
+            animation: bombBlast 4s infinite;
+            /* Remove heavy shadow/gradient if needed, but let's try keeping static style first */
+        }
+
+        .animate-price .strike-line {
+            animation: strikeLoop 4s infinite;
+        }
+
+        .animate-price .real-price {
+            animation: realLoop 4s infinite;
+        }
+
+        .animate-price .fake-price {
+            animation: fakeLoop 4s infinite;
+        }
+
+        /* Simplified Loops: Opacity + Transform only */
+        /* Simplified Loops: Opacity + Transform only */
+        @keyframes strikeLoop {
+            0% {
+                width: 0;
+                opacity: 1;
+            }
+
+            15% {
+                width: 95%;
+                opacity: 1;
+            }
+
+            25% {
+                width: 95%;
+                opacity: 0;
+            }
+
+            100% {
+                width: 95%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fakeLoop {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            20% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            25% {
+                opacity: 0;
+                /* Vanishes exactly when Real Price appears */
+                transform: scale(1.1);
+            }
+
+            90% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Note: There was a duplicate realLoop definition in previous versions, this replaces both */
+        /* Note: There was a duplicate realLoop definition in previous versions, this replaces both */
+        @keyframes realLoop {
+            0% {
+                opacity: 0;
+                filter: blur(10px);
+                transform: scale(0.5) rotate(-4deg);
+                color: #ccff00;
+                /* Start Lime */
+            }
+
+            25% {
+                opacity: 0;
+                /* Invisible while Fake Price is shown */
+                filter: blur(10px);
+                transform: scale(0.5) rotate(-4deg);
+            }
+
+            /* ENTRIES: GLITCH & CHANGE TO VIVID GREEN */
+            26% {
+                opacity: 1;
+                color: #ccff00;
+                /* Lime */
+                transform: scale(1.3) rotate(-8deg);
+                /* Extra tilt glitch */
+                text-shadow: -4px 0 #ff0000, 4px 0 #0000ff;
+                /* Glitch */
+                filter: blur(0);
+            }
+
+            28% {
+                color: #00ff00;
+                /* To Vivid Green */
+                transform: scale(1.1) rotate(-4deg);
+                /* Stabilize Tilted */
+                text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+            }
+
+            /* Heartbeat Pulse (Vivid Green) - Maintain Tilt */
+            45% {
+                transform: scale(1.2) rotate(-4deg);
+                text-shadow: 0 0 35px #00ff00;
+            }
+
+            55% {
+                transform: scale(1.1) rotate(-4deg);
+                text-shadow: 0 0 15px #00ff00;
+            }
+
+            65% {
+                transform: scale(1.2) rotate(-4deg);
+                text-shadow: 0 0 35px #00ff00;
+            }
+
+            75% {
+                transform: scale(1.1) rotate(-4deg);
+                text-shadow: 0 0 15px #00ff00;
+            }
+
+            85% {
+                transform: scale(1.2) rotate(-4deg);
+                text-shadow: 0 0 35px #00ff00;
+            }
+
+            /* Hold visibility longer */
+            95% {
+                opacity: 1;
+                transform: scale(1.15) rotate(-4deg);
+                color: #00ff00;
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.5) rotate(-4deg);
+                filter: blur(20px);
+            }
+        }
+
+
+        @keyframes pricePulse {
+            0% {
+                filter: brightness(1);
+                color: #2ecc71;
+                transform: scale(1);
+            }
+
+            50% {
+                filter: brightness(1.3);
+                color: #00ff00;
+                transform: scale(1.08);
+            }
+
+            100% {
+                filter: brightness(1);
+                color: #2ecc71;
+                transform: scale(1);
+            }
+        }
+
+        .fomo-text {
+            font-size: 0.85rem;
+            color: #ffeb3b;
+            font-weight: 800;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            /* Move to left */
+            gap: 4px;
+        }
+
+        .buy-btn {
+            background: linear-gradient(90deg, #ff3d00, #ff9100, #ff3d00);
+            background-size: 200% 100%;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 32px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 25px rgba(255, 61, 0, 0.5);
+            flex: 1;
+            /* Grow to fill space */
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            animation: pulseBtn 2s infinite, bgFlow 3s linear infinite;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            min-width: 0;
+            /* Allow shrinking if needed */
+        }
+
+        /* Shine Effect */
+        .buy-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transform: skewX(-20deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+
+            20% {
+                left: 100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .buy-btn:hover {
+            transform: scale(1.15) !important;
+            box-shadow: 0 10px 40px rgba(255, 61, 0, 0.8);
+            z-index: 10;
+        }
+
+        /* Party Dots Background on Hover */
+        .buy-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(#fff 20%, transparent 20%),
+                radial-gradient(#ffeb3b 20%, transparent 20%);
+            background-position: 0 0, 5px 5px;
+            background-size: 10px 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+
+        .buy-btn:hover::after {
+            opacity: 0.8;
+            animation: partyDots 0.4s linear infinite;
+            background-image:
+                radial-gradient(#fff 30%, transparent 30%),
+                radial-gradient(#ffff00 30%, transparent 30%);
+        }
+
+        @keyframes partyDots {
+            0% {
+                background-position: 0 0, 5px 5px;
+            }
+
+            100% {
+                background-position: 20px 20px, 25px 25px;
+            }
+        }
+
+        @keyframes bgFlow {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        @keyframes pulseBtn {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 61, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 61, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 61, 0, 0);
+            }
+        }
+
+        .fomo-text {
+            display: block;
+            font-size: 0.75rem;
+            color: #ffeb3b;
+            margin-bottom: 4px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .pointing-finger {
+            font-size: 1.4rem;
+            animation: pointRight 0.8s ease-in-out infinite alternate;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        @keyframes pointRight {
+            from {
+                transform: translateX(-5px);
+            }
+
+            to {
+                transform: translateX(5px);
+            }
+        }
+
+        .inline-btn.btn-share svg {
+            fill: rgba(255, 255, 255, 0.4);
+        }
+
+        .inline-btn.btn-share:hover svg {
+            fill: #00d4ff;
+        }
+
+        .share-toast {
+            position: fixed;
+            top: 100px;
+            /* Below search bar */
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00d4ff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: toastFade 2s forwards;
+        }
+
+        @keyframes toastFade {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+
+            20% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+        }
+
+
+        .story-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .story-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.15);
+        }
+
+        .story-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+        }
+
+        .inline-btn {
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .inline-btn:active {
+            transform: scale(0.9);
+        }
+
+        .inline-btn svg {
+            fill: rgba(255, 77, 77, 0.35);
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .inline-btn:hover svg {
+            fill: rgba(255, 77, 77, 0.8);
+            transform: scale(1.15);
+        }
+
+        .inline-btn.saved svg {
+            fill: #ff0000 !important;
+            filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6));
+            animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes syncedBeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            15% {
+                transform: scale(1.05);
+                opacity: 0.55;
+            }
+
+            /* Lub */
+            25% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            45% {
+                transform: scale(1.35);
+                opacity: 0.75;
+            }
+
+            /* DUB (BIG BEAT) */
+            60% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes syncedOverlay {
+            0% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            15% {
+                opacity: 0.15;
+                transform: scale(1.05);
+            }
+
+            /* Lub */
+            25% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            45% {
+                opacity: 0.4;
+                transform: scale(1.3);
+            }
+
+            /* DUB (FLASH) */
+            60% {
+                opacity: 0;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .inline-btn.btn-mute {
+            width: 64px;
+            /* Even bigger */
+            height: 64px;
+        }
+
+        .inline-btn img {
+            width: 42px;
+            /* Bigger Icon */
+            height: 42px;
+            transition: 0.2s;
+        }
+
+        @keyframes heartPop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.4);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Desktop Layout Fixes */
+        @media (min-width: 1100px) {
+            video {
+                width: 100%;
+                max-width: 440px;
+            }
+
+            .shorts-container {
+                width: 100%;
+                max-width: 440px;
+                margin: 0 auto;
+                background: #111;
+                border-radius: 40px;
+                box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+            }
+
+            .overlay,
+            .search-container {
+                max-width: 440px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .nav-buttons {
+                right: max(20px, calc(50% - 280px));
+            }
+
+            .saved-bar {
+                left: max(20px, calc(50% - 540px));
+                width: 260px;
+            }
+        }
+
+        @media (max-width: 1099px) {
+            .saved-bar {
+                left: 10px;
+                width: 55px;
+                padding: 5px;
+                border-radius: 12px;
+                background: rgba(15, 5, 30, 0.8);
+            }
+
+            .saved-bar .saved-item-title,
+            .saved-bar .saved-bar-header,
+            .saved-bar .saved-remove {
+                display: none;
+            }
+
+            .saved-bar .saved-item {
+                padding: 3px;
+                justify-content: center;
+            }
+
+            /* Note: .saved-item img styling removed as requested in text-only update */
+
+            .saved-bar:hover {
+                width: 260px;
+                padding: 18px;
+                border-radius: 28px;
+            }
+
+            .saved-bar:hover .saved-item-title,
+            .saved-bar:hover .saved-bar-header,
+            .saved-bar:hover .saved-remove {
+                display: flex;
+            }
+
+            .saved-bar:hover .saved-item {
+                justify-content: flex-start;
+                padding: 12px;
+            }
+
+            /* Mobile adjustment for Story Bar */
+            .story-bar {
+                left: 10px;
+                width: 55px;
+                padding: 5px;
+            }
+
+            .story-bar:hover {
+                width: 260px;
+                padding: 18px;
+            }
+
+            .story-bar .saved-item-title,
+            .story-bar .saved-bar-header {
+                display: none;
+            }
+
+            .story-bar:hover .saved-item-title,
+            .story-bar:hover .saved-bar-header {
+                display: flex;
+            }
+        }
+
+        /* --- Search Bar (Top) --- */
+        .search-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            /* Ensure on top */
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 25px;
+            border-radius: 32px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ee4d2d;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        /* --- Double Tap Heart Animation --- */
+        .heart-pop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 100;
+            pointer-events: none;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+        }
+
+        .heart-pop.animate {
+            animation: heartShoot 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes heartShoot {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+
+            30% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -150%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* --- Particle Canvas --- */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* --- AI Assistant (น้องรับจ้าง) --- */
+        .ai-assistant-wrap {
+            position: fixed;
+            bottom: 120px;
+            /* Near the buy button row */
+            left: 50%;
+            transform: translateX(110px) translateY(20px);
+            /* Move right of center */
+            z-index: 200;
+            display: flex;
+            flex-direction: row-reverse;
+            /* Avatar on the right, bubble on the left */
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Adjust for Mobile */
+        @media (max-width: 600px) {
+            .ai-assistant-wrap {
+                left: auto;
+                right: 10px;
+                transform: translateX(0) translateY(20px);
+            }
+        }
+
+        .ai-assistant-wrap.visible {
+            opacity: 1;
+            transform: translateX(110px) translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .ai-assistant-wrap.visible {
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        .ai-bubble {
+            background: rgba(255, 255, 255, 0.98);
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 20px 20px 0 20px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            position: relative;
+            max-width: 160px;
+            line-height: 1.4;
+            border: 2px solid #ee4d2d;
+            text-align: center;
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #ee4d2d;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            animation: bounceIn 1s infinite alternate;
+        }
+
+        .ai-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes bounceIn {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Mute Button Animation & Tooltip */
+        .inline-btn.btn-mute {
+            position: relative;
+        }
+
+        .bouncing-mute {
+            animation: bounceMute 2s infinite;
+        }
+
+        @keyframes bounceMute {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: scale(1);
+            }
+
+            40% {
+                transform: scale(1.2) rotate(-10deg);
+            }
+
+            60% {
+                transform: scale(1.1) rotate(10deg);
+            }
+        }
+
+        .mute-tooltip {
+            position: absolute;
+            bottom: 75px;
+            /* Higher up to be visible */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(238, 77, 45, 0.9);
+            /* Shopee Orange for attention */
+            backdrop-filter: blur(4px);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            animation: floatTooltip 1.5s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 200;
+            border: 2px solid #fff;
+        }
+
+        .mute-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(0, 0, 0, 0.6);
+        }
+
+        @keyframes floatTooltip {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-6px);
+            }
+        }
+
+
+        /* Grey Hat: Social Proof Toast - Premium Center Version */
+        .social-toast {
+            position: fixed;
+            bottom: 45px;
+            /* Positioned in the circled area */
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            /* Slide up from bottom */
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            z-index: 10001;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .social-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .social-toast .dot {
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #2ecc71;
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toast-content b {
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาสินค้า..."
+            oninput="handleSearch(this.value)">
+    </div>
+
+
+    <!-- Saved Bar moved here -->
+    <div class="saved-bar" id="savedBar"></div>
+
+    <!-- Static Links for SEO (Will be replaced/supplemented by JS but good for bots crawling immediately) -->
+    <div id="storyBar">
+        <a href="?v=P" class="story-tag" rel="nofollow">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="img" loading="lazy">
+            <span>สินค้าแนะนำ</span>
+        </a>
+        <a href="?v=" class="story-tag" rel="nofollow">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="img" loading="lazy">
+            <span>สินค้าแนะนำ</span>
+        </a>
+        <a href="?v=" class="story-tag" rel="nofollow">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="img" loading="lazy">
+            <span>สินค้าแนะนำ</span>
+        </a>
+        <a href="?v=N" class="story-tag" rel="nofollow">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="img" loading="lazy">
+            <span>สินค้าแนะนำ</span>
+        </a>
+    </div>
+
+    <div id="shareToast" class="share-toast">คัดลอกลิงก์เรียบร้อย! 🔗</div>
+
+
+    <div class="nav-buttons">
+        <div class="nav-btn" id="btnUp" onclick="scrollSlide(-1)">
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" />
+            </svg>
+        </div>
+        <div class="nav-btn" id="btnDown" onclick="scrollSlide(1)">
+            <svg viewBox="0 0 24 24">
+                <path d="M7.41,8.59L12,13.17L16.59,8.59L18,10L12,16L6,10L7.41,8.59Z" />
+            </svg>
+        </div>
+    </div>
+
+
+    <div class="shorts-container" id="container"></div>
+
+    <!-- Particle Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- AI Assistant -->
+    <div class="ai-assistant-wrap" id="aiAssistant">
+        <div class="ai-avatar">
+            <img src="https://cdn-icons-png.flaticon.com/128/8417/8417163.png" alt="น้องรับจ้าง">
+        </div>
+        <div class="ai-bubble" id="aiMsg">ตัวนี้หนูใช้เอง ดีจริงพี่!</div>
+    </div>
+
+    <script>
+        let allProducts = [];
+        let displayProducts = [];
+        let savedList = [];
+
+        function parseShopeePrice(val) {
+            if (!val) return 0;
+            if (typeof val === 'number') return val;
+            let s = String(val).replace(/,/g, '').trim().toLowerCase();
+
+            // Handle ranges like "100 - 200" -> keep the first number
+            if (s.includes('-')) {
+                s = s.split('-')[0].trim();
+            }
+
+            let multiplier = 1;
+            if (s.includes('พัน') || s.includes('k')) {
+                multiplier = 1000;
+                s = s.replace(/พัน|k/g, '');
+            } else if (s.includes('หมื่น')) {
+                multiplier = 10000;
+                s = s.replace(/หมื่น/g, '');
+            } else if (s.includes('แสน')) {
+                multiplier = 100000;
+                s = s.replace(/แสน/g, '');
+            } else if (s.includes('ล้าน') || s.includes('m')) {
+                multiplier = 1000000;
+                s = s.replace(/ล้าน|m/g, '');
+            }
+
+            // Remove everything except numbers and decimal point
+            s = s.replace(/[^\d.]/g, '');
+
+            const num = parseFloat(s);
+            return isNaN(num) ? 0 : Math.floor(num * multiplier);
+        }
+        try {
+            savedList = JSON.parse(localStorage.getItem('shopeeShortsSaved')) || [];
+        } catch (e) { savedList = []; }
+        let isMuted = true;
+        let userInteracted = false; // Require interaction before auto-unmute
+        let isShopping = false; // Prevent autoplay when shopping
+        let observer;
+        let initialTargetId = null; // Store product ID from initial URL
+        let aiTimeout = null;
+
+        // Capture first interaction to allow auto-audio
+        const setInteracted = () => { userInteracted = true; };
+        document.addEventListener('click', setInteracted, { capture: true });
+        document.addEventListener('keydown', setInteracted, { capture: true });
+        document.addEventListener('touchstart', setInteracted, { capture: true });
+
+        const ICON_HEART = '<path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>';
+
+        async function init() {
+            renderSavedBar(); // Render immediately
+            try {
+                // Persistent Session Check
+                const sessionData = sessionStorage.getItem('shopeeShortsSession');
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // Support ?v=ID, ?id=ID, ?q=KEYWORD
+                let targetId = urlParams.get('v') || urlParams.get('id');
+                let keyword = urlParams.get('q');
+
+                // Legacy fallback support (e.g. ?12345)
+                if (!targetId && !keyword) {
+                    const raw = window.location.search.substring(1);
+                    if (/^\d+$/.test(raw)) targetId = raw;
+                }
+
+                if (!initialTargetId) initialTargetId = targetId;
+
+                if (sessionData) {
+                    allProducts = JSON.parse(sessionData);
+                } else {
+                    // New: Fetch from Supabase
+                    const SUPABASE_URL = 'https://jbbirnklofoscfhpedes.supabase.co';
+                    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpiYmlybmtsb2Zvc2NmaHBlZGVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3Mzk0MjcsImV4cCI6MjA4NDMxNTQyN30.oboZnO28wZDxFTkDfId5ZhAdIsAZXcs9So1ZcUtfgtE';
+
+                    const resp = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.desc&limit=1000`, {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+
+                    if (!resp.ok) throw new Error('Load failed');
+                    let rawData = await resp.json();
+
+                    allProducts = rawData.filter(p => p.id && p.video).map(p => ({
+                        id: String(p.id),
+                        url: p.video,
+                        title: (p.tag && p.tag[0]) ? p.tag[0] : 'สินค้าแนะนำ',
+                        desc: (p.data_shopee) ? p.data_shopee.slice(0, 3).join(' | ') : '',
+                        link: p.link_shopee || '#',
+                        price: p.price || '',
+                        image: (() => {
+                            let raw = p.image || p.image_url || p.images || p.img || p.picture || p.cover;
+                            if (Array.isArray(raw)) return raw[0];
+                            if (typeof raw === 'string') {
+                                if (raw.startsWith('[')) {
+                                    try { return JSON.parse(raw.replace(/'/g, '"'))[0]; } catch (e) { }
+                                }
+                                if (raw.includes(',')) return raw.split(',')[0].trim();
+                                return raw;
+                            }
+                            return null;
+                        })()
+                    }));
+                    if (!keyword && !targetId) allProducts.sort(() => 0.5 - Math.random());
+                    sessionStorage.setItem('shopeeShortsSession', JSON.stringify(allProducts));
+
+                    // Render Story Bar immediately after data load
+                    renderStoryBar();
+                    renderList();
+                    renderSavedBar();
+                }
+
+                if (keyword) {
+                    const decodedKey = decodeURIComponent(keyword).trim();
+                    document.getElementById('searchInput').value = decodedKey;
+
+                    // Smart Routing: Filter Playlist to MATCH keyword only
+                    const lowerKey = decodedKey.toLowerCase();
+                    const filtered = allProducts.filter(p =>
+                        p.title.toLowerCase().includes(lowerKey) ||
+                        p.desc.toLowerCase().includes(lowerKey)
+                    );
+
+                    if (filtered.length > 0) {
+                        displayProducts = filtered;
+                        // Shuffle slightly for freshness, but keep relevance
+                        displayProducts.sort(() => 0.5 - Math.random());
+                    } else {
+                        // Fallback if not found
+                        displayProducts = [...allProducts].sort(() => 0.5 - Math.random());
+                        window.isShowingSuggestions = true;
+                    }
+                } else {
+                    displayProducts = [...allProducts]; // Default random or sorted
+                }
+
+                if (!keyword && targetId) {
+                    const idx = displayProducts.findIndex(p => String(p.id) === String(targetId));
+                    if (idx > -1) {
+                        const [item] = displayProducts.splice(idx, 1);
+                        displayProducts.unshift(item);
+                    }
+                }
+
+                renderList();
+                renderSavedBar(); // Re-render to update images from fetched data
+
+
+
+
+
+
+
+                if (!keyword && targetId) {
+                    // Auto-save logic (User Request)
+                    const targetProd = allProducts.find(p => String(p.id) === String(targetId));
+                    if (targetProd) {
+                        const existingIdx = savedList.findIndex(x => String(x.id) === String(targetId));
+                        if (existingIdx === -1) {
+                            if (savedList.length >= 20) savedList.shift();
+                            savedList.push({ id: String(targetId), title: targetProd.title, image: targetProd.image });
+                            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+                            renderSavedBar();
+                        }
+                    }
+
+                    setTimeout(() => {
+                        const el = document.getElementById('product-' + targetId);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'instant' });
+                            setTimeout(updateNavState, 150);
+                        }
+                    }, 100);
+                } else if (keyword && displayProducts.length > 0) {
+                    // Auto-save First Result for Search (User Request)
+                    const firstP = displayProducts[0];
+                    const existingIdx = savedList.findIndex(x => String(firstP.id) === String(firstP.id));
+                    if (existingIdx === -1) {
+                        if (savedList.length >= 20) savedList.shift();
+                        savedList.push({ id: String(firstP.id), title: firstP.title, image: firstP.image });
+                        localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+                        renderSavedBar();
+                    }
+                    setTimeout(updateNavState, 150);
+                } else {
+                    setTimeout(updateNavState, 150);
+                }
+
+                document.getElementById('loading').style.display = 'none';
+                // renderSavedBar(); // Moved to top of init for immediate display
+
+            } catch (e) {
+                document.getElementById('loading').innerHTML = `<div style="color:red">${e.message}</div>`;
+            }
+        }
+
+        function filterProducts(keyword) {
+            if (!keyword) {
+                displayProducts = [...allProducts];
+                window.isShowingSuggestions = false;
+                document.title = "🎞️ ดูคลิปรีวิวสินค้าที่นี่";
+            } else {
+                const lower = keyword.toLowerCase();
+                document.title = `รวมรีวิว: ${keyword} | น้องรับจ้าง`;
+                const keywords = lower.split(/\s+/).filter(k => k.length > 0);
+                let scored = allProducts.map(p => {
+                    let score = 0;
+                    const title = p.title.toLowerCase();
+                    const desc = p.desc.toLowerCase();
+                    if (title.includes(lower)) score += 500;
+                    keywords.forEach(k => {
+                        if (title.includes(k)) score += 100;
+                        if (desc.includes(k)) score += 20;
+                    });
+                    return { ...p, score };
+                }).filter(p => p.score > 0);
+
+                scored.sort((a, b) => b.score - a.score);
+                if (scored.length === 0) {
+                    window.isShowingSuggestions = true;
+                    displayProducts = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 15);
+                } else {
+                    window.isShowingSuggestions = false;
+                    displayProducts = scored;
+                }
+            }
+            renderList();
+        }
+
+        function handleSearch(val) { filterProducts(val); }
+
+        let currentRenderIndex = 0;
+        const RENDER_BATCH_SIZE = 5; // Load smaller chunks for mobile stability
+
+        function renderList() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            currentRenderIndex = 0;
+
+            if (window.isShowingSuggestions) {
+                const msg = document.createElement('div');
+                msg.style.cssText = "position:fixed; top:85px; left:50%; transform:translateX(-50%); z-index:110; background:rgba(238,77,45,0.95); padding:8px 24px; border-radius:30px; font-size:13px; font-weight:bold; backdrop-filter:blur(5px); box-shadow:0 4px 15px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); color:#fff;";
+                msg.innerHTML = "✨ ไม่พบที่ค้นหา แต่ฉันขอแนะนำสิ่งนี้แทน!";
+                container.appendChild(msg);
+            }
+
+            initObserver();
+            appendNextBatch();
+            updateAllMuteIcons();
+            updateNavState();
+        }
+
+        function appendNextBatch() {
+            if (currentRenderIndex >= displayProducts.length) return;
+
+            const nextBatch = displayProducts.slice(currentRenderIndex, currentRenderIndex + RENDER_BATCH_SIZE);
+            nextBatch.forEach(v => appendVideo(v));
+            currentRenderIndex += nextBatch.length;
+        }
+
+        function appendVideo(v) {
+            const container = document.getElementById('container');
+            const div = document.createElement('div');
+            div.className = 'short-item';
+            div.id = 'product-' + v.id;
+            div.setAttribute('data-id', v.id);
+
+            const isSaved = savedList.some(item => item.id === v.id);
+            const priceVal = parseShopeePrice(v.price);
+            const formattedPrice = priceVal.toLocaleString();
+            const fakePrice = priceVal > 0 ? Math.floor(priceVal * 1.33).toLocaleString() : '';
+            const viewers = Math.floor(Math.random() * (450 - 120 + 1)) + 120; // Random 120-450
+
+            // Use data-src for Lazy Loading (Poster removed per request)
+            div.innerHTML = `
+            <video class="short-video" data-src="${v.url}" playsinline preload="none" ${isMuted ? 'muted' : ''}></video>
+            <div class="overlay">
+                <div class="overlay-content">
+                    <div class="product-title">${v.title}</div>
+                    <div class="product-desc">${v.desc}</div>
+                    <div class="actions-row">
+                        <div class="inline-btn ${isSaved ? 'saved' : ''}" id="btn-save-${v.id}">
+                            <svg viewBox="0 0 24 24">${ICON_HEART}</svg>
+                        </div>
+                        <div class="price-section">
+                             <div class="fomo-text">🔥 ${viewers} กำลังดู</div>
+                             <div class="price-container" style="margin-top:2px;">
+                                 <div class="price-animate-box">
+                                     ${priceVal > 0 ? `
+                                         <span class="fake-price">฿${fakePrice}</span>
+                                         <div class="strike-line"></div>
+                                         <div class="price-bomb"></div>
+                                         <div class="real-price">
+                                            <span>฿${formattedPrice}</span>
+                                            <span class="free-shipping-tag">+ส่งฟรี</span>
+                                         </div>
+                                     ` : (v.price ? `<div class="real-price" style="opacity:1; filter:none; transform:none;">฿${formattedPrice}</div>` : '')}
+                                 </div>
+                             </div>
+                        </div>
+                        <a href="${v.link}" class="buy-btn" target="_blank" rel="nofollow" onclick="pauseAll()" onmousemove="startCheer(event)" onmouseleave="stopCheer()">
+                            <span class="pointing-finger">👉</span>
+                            <span>ดูสินค้านี้</span>
+                        </a>
+                        <div class="inline-btn btn-mute" onclick="toggleMute()">
+                           <div class="mute-icon-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Bottom Badges Container -->
+                <div class="bottom-badges">
+                    <div class="safety-badge">
+                        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                        <span>สินค้าปลอดภัย ภายใต้มาตรการ Shopee</span>
+                    </div>
+                    <a href="https://www.facebook.com/nongrabjang" target="_blank" class="fb-follow-btn-inline">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.15 5.96C15.21 5.96 16.12 6.04 16.12 6.04V8.51H15.01C13.77 8.51 13.38 9.28 13.38 10.07V12.06H16.16L15.72 14.96H13.38V21.96C18.16 21.21 21.82 17.06 21.82 12.06C21.82 6.53 17.32 2.04 12 2.04Z"/></svg>
+                        <span>น้องรับจ้าง</span>
+                    </a>
+                </div>
+                <!-- Neon Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <!-- 3D Heart Overlay -->
+                <div class="heart-pop">
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="#ff4d4d">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
+            </div>`;
+
+            // Onclick handler attached to video element later after creation
+            const vidEl = div.querySelector('video');
+
+            // Loop count logic
+            vidEl._loopCount = 0;
+            vidEl.addEventListener('ended', () => {
+                vidEl._loopCount++;
+                if (vidEl._loopCount < 3) {
+                    vidEl.currentTime = 0;
+                    vidEl.play();
+                } else {
+                    vidEl.pause();
+                    window.open(v.link, '_blank');
+                }
+            });
+            const pBar = div.querySelector('.progress-bar');
+            const hPop = div.querySelector('.heart-pop');
+
+            // Double Tap Detection
+            let lastTap = 0;
+            vidEl.addEventListener('touchstart', (e) => {
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    handleDoubleTap(v);
+                }
+                lastTap = now;
+            });
+            // Also for Desktop
+            vidEl.addEventListener('dblclick', () => handleDoubleTap(v));
+
+            function handleDoubleTap(v) {
+                // Heart Animation
+                hPop.classList.remove('animate');
+                void hPop.offsetWidth; // Trigger reflow
+                hPop.classList.add('animate');
+
+                // Save if not already saved
+                const isSaved = savedList.some(item => item.id === v.id);
+                if (!isSaved) {
+                    toggleSave(v.id, v.title);
+                }
+            }
+
+            // Progress Bar Update
+            vidEl.addEventListener('timeupdate', () => {
+                if (vidEl.duration) {
+                    const pct = (vidEl.currentTime / vidEl.duration) * 100;
+                    pBar.style.width = pct + '%';
+                }
+            });
+            vidEl.onclick = function () {
+                if (this.paused) {
+                    loadVideo(this);
+                    this.play();
+                } else {
+                    this.pause();
+                }
+            };
+
+            // Safe event listener for Save button
+            const saveBtn = div.querySelector(`#btn-save-${v.id}`);
+            if (saveBtn) saveBtn.onclick = (e) => toggleSave(v.id, v.title, e);
+
+            container.appendChild(div);
+            if (window.observer) window.observer.observe(div);
+        }
+
+        function initObserver() {
+            if (window.observer) return;
+
+            const options = { root: document.getElementById('container'), threshold: 0.6 };
+            window.observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (!video) return;
+
+                    if (entry.isIntersecting) {
+                        // Load and Play Current
+
+                        // IF SHOPPING, DO NOT PLAY
+                        if (window.isShopping) {
+                            // Just load it but don't play
+                            loadVideo(video);
+                            video.pause();
+                            return;
+                        }
+
+                        if (userInteracted) {
+                            // User has clicked/tapped before -> We can force Unmute
+                            isMuted = false;
+                            video.muted = false;
+                            video.volume = 1.0;
+                        } else {
+                            // No interaction yet -> Browser blocks Audio -> Keep Muted & Show Icon
+                            isMuted = true;
+                            video.muted = true;
+                        }
+                        updateAllMuteIcons();
+
+                        loadVideo(video);
+                        video._loopCount = 0; // Reset loop count when starting fresh
+
+                        // Trigger Price Animation
+                        const priceContainer = entry.target.querySelector('.price-container');
+                        if (priceContainer) {
+                            priceContainer.classList.remove('animate-price');
+                            void priceContainer.offsetWidth; // Force reflow
+                            priceContainer.classList.add('animate-price');
+                        }
+
+                        video.play().catch(() => {
+                            // If autoplay blocked, keep muted but try to play
+                            video.muted = true;
+                            video.play();
+                        });
+
+
+                        // Preload Neighbors (Prev + Next)
+                        const parent = entry.target;
+                        const prev = parent.previousElementSibling;
+                        const next = parent.nextElementSibling;
+                        if (prev) loadVideo(prev.querySelector('video'));
+                        if (next) loadVideo(next.querySelector('video'));
+
+                        // Cleanup Distant Videos
+                        cleanupVideos(parent);
+
+                        const pid = entry.target.getAttribute('data-id');
+                        history.replaceState(null, '', '?v=' + pid);
+                        const prod = allProducts.find(p => p.id === pid);
+                        if (prod) document.title = prod.title + " - น้องรับจ้าง";
+
+                        // Reset Social Proof Toast for new video
+                        const toast = document.getElementById('socialToast');
+                        if (toast) toast.classList.remove('show');
+                        if (window.nextToastTimeout) clearTimeout(window.nextToastTimeout);
+                        window.nextToastTimeout = setTimeout(showRandomToast, 5000);
+
+                        // Infinite Scroll Trigger
+                        const allItems = document.querySelectorAll('.short-item');
+                        const thresholdIndex = allItems.length - 2;
+                        if (allItems[thresholdIndex] &&
+                            (entry.target === allItems[thresholdIndex] || entry.target === allItems[allItems.length - 1])) {
+                            appendNextBatch();
+                        }
+
+                    } else {
+                        video.pause();
+                        video.currentTime = 0;
+                        const priceContainer = entry.target.querySelector('.price-container');
+                        if (priceContainer) priceContainer.classList.remove('animate-price');
+                    }
+
+                    // AI Assistant Reset on Change
+                    if (entry.isIntersecting) {
+                        if (aiTimeout) clearTimeout(aiTimeout);
+                        const aiWrap = document.getElementById('aiAssistant');
+                        if (aiWrap) aiWrap.classList.remove('visible');
+                        aiTimeout = setTimeout(() => {
+                            if (!window.isShopping) showAIAssistant();
+                        }, 20000);
+                    }
+                });
+            }, options);
+        }
+
+        function loadVideo(v) {
+            if (v.getAttribute('src')) return true; // Already loaded
+            const src = v.getAttribute('data-src');
+            if (src) {
+                v.src = src;
+                v.load();
+                return true;
+            }
+            return false;
+        }
+
+        function cleanupVideos(currentItem) {
+            const allItems = Array.from(document.querySelectorAll('.short-item'));
+            const currentIndex = allItems.indexOf(currentItem);
+
+            allItems.forEach((item, index) => {
+                // Keep only range of [current-1, current+1] loaded for strict mobile memory
+                const dist = Math.abs(index - currentIndex);
+                if (dist > 1) {
+                    const v = item.querySelector('video');
+                    // Only act if it actually has a source to clear
+                    if (v && (v.getAttribute('src') || v.src)) {
+                        v.pause();
+                        v.removeAttribute('src'); // Remove attribute
+                        v.src = ""; // Explicitly clear property
+                        v.load(); // Force detach
+                    }
+                }
+            });
+        }
+
+        function scrollSlide(dir) {
+            // Auto Unmute on navigation click
+            if (isMuted) {
+                isMuted = false;
+                document.querySelectorAll('video').forEach(v => v.muted = false);
+                updateAllMuteIcons();
+            }
+
+            const h = window.innerHeight;
+            document.getElementById('container').scrollBy({ top: dir * h, behavior: 'smooth' });
+        }
+
+        // Global scroll handler to support wheel anywhere
+        window.addEventListener('wheel', (e) => {
+            const container = document.getElementById('container');
+            // Check if scrolling inside saved-bar or rec-bar, ignore global scroll
+            if (e.target.closest('.saved-bar') || e.target.closest('.rec-bar')) return;
+
+            e.preventDefault();
+            container.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        }, { passive: false });
+        function updateNavState() {
+            const container = document.getElementById('container');
+            const btnUp = document.getElementById('btnUp');
+            const btnDown = document.getElementById('btnDown');
+            if (!btnUp || !btnDown) return;
+            if (container.scrollTop <= 10) btnUp.classList.add('hidden');
+            else btnUp.classList.remove('hidden');
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) btnDown.classList.add('hidden');
+            else btnDown.classList.remove('hidden');
+        }
+        document.getElementById('container').addEventListener('scroll', updateNavState);
+
+        function pauseAll() { document.querySelectorAll('video').forEach(v => v.pause()); }
+
+        window.toggleMute = function () {
+            userInteracted = true;
+            isMuted = !isMuted;
+            document.querySelectorAll('video').forEach(v => v.muted = isMuted);
+            updateAllMuteIcons();
+        };
+
+        function updateAllMuteIcons() {
+            const wraps = document.querySelectorAll('.mute-icon-wrap');
+
+            // Toggle Beat Mode on Body
+            if (isMuted) {
+                document.body.classList.remove('beat-mode');
+            } else {
+                document.body.classList.add('beat-mode');
+            }
+
+            wraps.forEach(wrap => {
+                const btn = wrap.parentElement;
+                if (isMuted) {
+                    wrap.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/4067/4067572.png">`;
+                    btn.style.display = 'flex';
+                    btn.classList.add('bouncing-mute');
+                    btn.style.opacity = '1';
+                } else {
+                    wrap.innerHTML = '';
+                    btn.style.display = 'none';
+                    btn.classList.remove('bouncing-mute');
+                }
+            });
+        }
+
+        window.toggleSave = function (id, title, e) {
+            if (e) e.stopPropagation();
+            const idx = savedList.findIndex(x => x.id === id);
+
+            if (idx === -1) {
+                // Find product to get image
+                const prod = allProducts.find(p => p.id === id);
+                const image = prod ? prod.image : null;
+
+                if (savedList.length >= 20) savedList.shift();
+                savedList.push({ id, title, image });
+                const btn = document.getElementById('btn-save-' + id);
+                if (btn) btn.classList.add('saved');
+            } else {
+                savedList.splice(idx, 1);
+                const btn = document.getElementById('btn-save-' + id);
+                if (btn) btn.classList.remove('saved');
+            }
+            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+            renderSavedBar();
+            renderStoryBar(); // Render the new story bar
+        };
+
+        window.removeSaved = function (e, id) {
+            e.preventDefault(); // Prevent <a> click if nested
+            e.stopPropagation();
+
+            // Find product to get link before removing
+            const prod = allProducts.find(p => String(p.id) === String(id));
+            // Removed auto-open logic on delete per user request ("Just remove")
+
+            savedList = savedList.filter(x => x.id !== id);
+            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+            renderSavedBar();
+
+            const btn = document.getElementById('btn-save-' + id);
+            if (btn) btn.classList.remove('saved');
+        };
+
+        window.playVideo = function (id) {
+            // Hide recommendation bar immediately upon click
+            const bar = document.getElementById('recBar');
+            if (bar) bar.style.display = 'none';
+
+            const el = document.getElementById('product-' + id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                window.location.href = '?v=' + id;
+            }
+        };
+
+        /* Grey Hat Functions */
+
+        const names = ["คุณสมชาย", "คุณวิภา", "คุณมานะ", "คุณนารี", "คุณอภิชาติ", "คุณกานดา", "คุณสิทธิพล", "คุณอุบล"];
+        const provs = ["กทม.", "เชียงใหม่", "ชลบุรี", "ขอนแก่น", "นนทบุรี", "ภูเก็ต", "นครราชสีมา"];
+
+        function showRandomToast() {
+            const toast = document.getElementById('socialToast');
+            const textEl = document.getElementById('toastText');
+
+            const name = names[Math.floor(Math.random() * names.length)];
+            const prov = provs[Math.floor(Math.random() * provs.length)];
+            const count = Math.floor(Math.random() * 5) + 1;
+
+            const messages = [
+                `<b>${name}</b> จาก ${prov} เพิ่งกดสั่งซื้อไปเมื่อครู่`,
+                `<b>${name}</b> ได้รับ <b>โค้ดส่งฟรี</b> สำหรับสินค้านี้`,
+                `สินค้านี้ขายไปแล้ว <b>${count}9 ชิ้น</b> ในวันนี้`,
+                `สินค้านี้ได้รับรีวิว <b>5.0 ดาว</b> เต็ม! (จากผู้ซื้อจริง)`,
+                `ได้รับคะแนนรีวิวเฉลี่ย <b>4.9 ดาว</b> ทั่วประเทศ`,
+                `คะแนนความพึงพอใจลูกค้า <b>4.8 ดาว</b> คุ้มค่าแน่นอน`,
+                `สินค้ายอดนิยม! รีวิวสูงถึง <b>4.7 ดาว</b> แนะนำเลย`,
+                `ร้านนี้เพิ่งส่งสินค้าออกไปเมื่อ <b>${count} นาทีที่แล้ว</b>`,
+                `ร้านค้านี้กำลัง <b>ออนไลน์อยู่</b> พร้อมตอบแชททันที`,
+                `อัปเดต: ร้านค้าเพิ่งออนไลน์เมื่อ <b>${count} นาที</b> ที่ผ่านมา`,
+                `<b>99%</b> ของผู้ซื้อยืนยันว่าตรงปกและส่งไวมาก`
+            ];
+
+            textEl.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 8000); // Increase to 8 seconds for better readability
+
+            // Schedule next toast
+            if (window.nextToastTimeout) clearTimeout(window.nextToastTimeout);
+            window.nextToastTimeout = setTimeout(showRandomToast, 15000 + Math.random() * 10000);
+        }
+
+        // Initial start for Social Proof Toasts
+        window.nextToastTimeout = setTimeout(showRandomToast, 5000);
+
+        window.copyShareLink = function (id) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('q');
+            url.searchParams.set('v', id);
+
+            const link = url.toString();
+            navigator.clipboard.writeText(link).then(() => {
+                const toast = document.getElementById('shareToast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            });
+        };
+
+        window.clickSaved = function (id) {
+            // SET SHOPPING MODE
+            window.isShopping = true;
+
+            // Try to find the element in the DOM
+            let el = document.getElementById('product-' + id);
+            const prod = allProducts.find(p => String(p.id) === String(id));
+
+            // If not found in DOM but exists in data, inject it dynamically
+            if (!el && prod) {
+                appendVideo(prod);
+                setupObserver(); // Refresh observer for the new element
+                el = document.getElementById('product-' + id);
+            }
+
+            if (el) {
+                // Smooth scroll to the video
+                el.scrollIntoView({ behavior: 'smooth' });
+
+                // Open Shopee link after short delay (to let scroll finish)
+                if (prod) {
+                    setTimeout(() => {
+                        pauseAll();
+                        window.open(prod.link, '_blank');
+
+                        // Reset shopping mode after a few seconds so user can resume normally if they come back
+                        setTimeout(() => { window.isShopping = false; }, 3000);
+                    }, 800);
+                } else {
+                    window.isShopping = false;
+                }
+            } else {
+                // Fallback only if product completely missing from data
+                console.error("Product not found:", id);
+                window.isShopping = false;
+            }
+        };
+
+        function renderSavedBar() {
+            const bar = document.getElementById('savedBar');
+
+            // Always show the bar
+            bar.style.display = 'flex';
+
+            const sortedList = [...savedList].sort((a, b) => {
+                const isA = initialTargetId && String(a.id) === String(initialTargetId);
+                const isB = initialTargetId && String(b.id) === String(initialTargetId);
+                if (isA) return -1;
+                if (isB) return 1;
+                return 0;
+            });
+
+            let contentHTML = '<div class="saved-bar-header">ชอบสิ่งนี้มากๆ</div>';
+
+            if (sortedList.length === 0) {
+                // Placeholder content when empty
+                contentHTML += `
+                    <div class="saved-item placeholder" style="opacity: 0.7; pointer-events: none; justify-content: center; flex-direction: column; text-align: center; gap: 5px;">
+                        <div style="font-size: 24px;">✨</div>
+                        <div class="saved-item-title" style="font-size: 0.8rem; color: #ccc;">กดหัวใจสินค้า<br>เพื่อเก็บไว้ตรงนี้</div>
+                    </div>`;
+            } else {
+                contentHTML += sortedList.map(item => {
+                    const isActive = initialTargetId && String(item.id) === String(initialTargetId);
+                    // Try to find image if missing (compatibility with old saves)
+                    let imgUrl = item.image;
+                    if (!imgUrl) {
+                        // Fix: Use String(item.id) to ensure match with String(p.id)
+                        const prod = allProducts.find(p => String(p.id) === String(item.id));
+                        if (prod) {
+                            imgUrl = prod.image;
+                            // Persist found image back to savedList
+                            item.image = imgUrl;
+                            try { localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList)); } catch (e) { }
+                        }
+                    }
+
+                    return `
+                    <div class="saved-item ${isActive ? 'active' : ''}">
+                        <a href="${item.link || '#'}" target="_blank" rel="nofollow" style="text-decoration:none; display:flex; align-items:center; flex-grow:1; color:inherit;">
+                             ${imgUrl ? `<img src="${imgUrl}" alt="img">` : '<div style="width:40px;height:40px;background:#555;border-radius:8px;margin-right:10px;display:flex;align-items:center;justify-content:center;">🛍️</div>'}
+                             <div class="saved-item-title">${item.title}</div>
+                        </a>
+                        <div class="saved-remove" onclick="removeSaved(event, '${item.id}')">×</div>
+                    </div>`;
+                }).join('');
+            }
+
+            bar.innerHTML = contentHTML;
+        }
+
+        function renderStoryBar() {
+            const bar = document.getElementById('storyBar');
+            if (!allProducts || allProducts.length === 0) return;
+
+            // Random shuffle and take 15 items for horizontal scroll
+            const stories = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 15);
+
+            bar.style.display = 'flex';
+            // Tag Cloud StyleChips
+            bar.innerHTML = stories.map(item => {
+                let imgUrl = item.image || 'https://cdn-icons-png.flaticon.com/512/3081/3081559.png';
+                if (imgUrl.startsWith("['")) imgUrl = imgUrl.replace(/\['|'\]/g, "").split("', '")[0];
+
+                return `
+            <a href="?v=${item.id}" target="_blank" class="story-tag" rel="nofollow">
+                <img src="${imgUrl}" alt="img" loading="lazy">
+                <span>${item.title}</span>
+            </a>`;
+            }).join('');
+        }
+
+
+
+
+        init();
+        // --- Particle Magic Logic (Optimized Lite Version) ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                // Simplified properties for performance
+                if (type === 'scroll') {
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * -5 - 2;
+                    this.color = `hsla(${Math.random() * 360}, 70%, 70%, 0.6)`;
+                    this.decay = 0.02;
+                } else if (type === 'cheer') {
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 4 - 2;
+                    this.speedY = Math.random() * -8 - 3;
+                    this.color = `hsla(${Math.random() * 60 + 10}, 90%, 60%, 0.8)`;
+                    this.decay = 0.03;
+                } else {
+                    this.size = 2;
+                    this.speedX = 0;
+                    this.speedY = -1;
+                    this.color = '#fff';
+                    this.decay = 0.01;
+                }
+                this.alpha = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function handleParticles() {
+            if (particles.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                animationFrameId = null;
+                return; // Stop loop if empty to save CPU
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            animationFrameId = requestAnimationFrame(handleParticles);
+        }
+
+        function wakeUpParticles() {
+            if (!animationFrameId) {
+                handleParticles();
+            }
+        }
+
+        // --- Cheer Effect (Button Hover) ---
+        let cheerInterval;
+        window.startCheer = function (e) {
+            if (cheerInterval) return;
+            // Burst small amount
+            for (let i = 0; i < 5; i++) particles.push(new Particle(e.clientX, e.clientY, 'cheer'));
+            wakeUpParticles();
+
+            cheerInterval = setInterval(() => {
+                if (particles.length > 50) return; // Cap max particles
+                for (let i = 0; i < 2; i++) {
+                    particles.push(new Particle(Math.random() * canvas.width, canvas.height, 'cheer'));
+                }
+                if (window.lastMouseX) {
+                    particles.push(new Particle(window.lastMouseX, window.lastMouseY, 'cheer'));
+                }
+                wakeUpParticles();
+            }, 100); // Slower tick than before
+        }
+
+        window.stopCheer = function () {
+            clearInterval(cheerInterval);
+            cheerInterval = null;
+        }
+
+        // --- AI Assistant Logic ---
+        const phrases = [
+            "ตัวนี้หนูใช้เอง ดีจริงพี่!",
+            "ราคานี้พลาดแล้วเสียดายแย่",
+            "อันนี้ขายดีมาก รีบตำเลย!",
+            "ของมันต้องมีนะพี่!",
+            "ส่งไวมากร้านนี้ หนูคอนเฟิร์ม",
+            "คุ้มกว่านี้ไม่มีแล้วนะจ๊ะ",
+            "พี่จ๋า... อันนี้ลดเยอะมากกก",
+            "กดดูตระกร้าเลยพี่ ของแถมน่ารักมาก",
+            "ชิ้นนี้เพื่อนหนูทักทุกคน สวยจริง!",
+            "โปรลับมีแค่ช่วงนี้นะคะพี่",
+            "พี่ดูสิ... รีวิวอย่างแน่น!",
+            "หนูคัดมาให้แล้วเน้นๆ เลยนะ",
+            "ของแท้แน่นอน ล้านเปอร์เซ็นต์",
+            "พี่จ๋า... ช้าหมด อดนะ หนูเตือนแล้วนะ",
+            "จัดเลยพี่ สวยจบในชิ้นเดียว!",
+            "ใส่แล้วดูดีขึ้น 100% เชื่อหนู",
+            "อันนี้เห็นคนดังๆใช้กันเยอะมากพี่",
+            "ถูกกว่าเดินไปซื้อเองที่ห้างอีก",
+            "งานดี งานละเอียด ไม่ก๊อกแก๊กนะ",
+            "พี่ต้องลอง! แล้วจะรักเหมือนหนู",
+            "คุณภาพเกินราคาไปไกลมากพี่จ๋า",
+            "หนูแอบเก็บไว้ใช้เองตั้งหลายชิ้น!",
+            "อย่าคิดนานพี่ เดี๋ยวสต็อกหมดก่อน",
+            "พี่ดูตรงนี้... วัสดุเค้าดีจริงๆ นะ",
+            "สีสันสวยมาก ของจริงสวยกว่าในคลิปอีก",
+            "เอาไปเป็นของขวัญเค้าถูกใจแน่นอน",
+            "แฟนหนูเห็นยังชมว่าดีเลยพี่",
+            "ประหยัดเงินไปได้เยอะเลยพี่คุ้มสุดๆ",
+            "ลองแล้วจะรู้ว่าทำไมหนูถึงเชียร์",
+            "พี่จ๋าาา กดเร็ววว ของลดราคาอยู่!",
+            "ตัวนี้ฟังก์ชั่นครบ ใช้งานง่ายมาก",
+            "ทนทานมากพี่ ใช้ได้ยาวๆ เลย",
+            "ใครๆ ก็มีกัน พี่จะพลาดได้ไงเนอะ",
+            "ยอดขายอันดับ 1 ในหมวดนี้เลยนะ",
+            "พี่... อันนี้หนูให้ 10/10 เลยค่ะ",
+            "สั่งเลยพี่ เดี๋ยวหนูไปช่วยลุ้นของส่งถึง",
+            "ร้านนี้บริการดีมาก หนูประทับใจ",
+            "พี่คะ... ชิ้นนี้เปลี่ยนชีวิตหนูเลยนะ!",
+            "ดูราคาดิพี่ เท่ากับกาแฟไม่กี่แก้วเอง",
+            "สวยตะโกน! จนคนต้องมองตามแน่นอน",
+            "พี่จะขาว/สวย/เท่ ขึ้นทันตาเห็นเลย!",
+            "ของดีบอกต่อ หนูไม่หลอกพี่แน่นอน",
+            "พี่เชื่อใจน้องได้เลย ชิ้นนี้เด็ดจริง",
+            "นาทีทองนะคะพี่ จัดด่วนนน!",
+            "แพ็กของมาอย่างดี ปลอดภัยหายห่วง",
+            "ตัวช่วยดีๆ แบบนี้ หาไม่ได้ง่ายๆ นะ",
+            "พี่จ๋า... หนูจัดมาให้พี่โดยเฉพาะเลย",
+            "ความสุขเล็กๆ ในราคาสบายกระเป๋าจ้ะ",
+            "พี่คะ อันนี้ต้องจัดจริงๆ นะ",
+            "น้องรับจ้างฟันธง! ดีชัวร์จ้าพี่"
+        ];
+        const avatars = [
+            "https://cdn-icons-png.flaticon.com/128/10851/10851235.png",
+            "https://cdn-icons-png.flaticon.com/128/6723/6723246.png",
+            "https://cdn-icons-png.flaticon.com/128/10477/10477506.png",
+            "https://cdn-icons-png.flaticon.com/128/4138/4138902.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851314.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851330.png",
+            "https://cdn-icons-png.flaticon.com/128/18404/18404971.png",
+            "https://cdn-icons-png.flaticon.com/128/10477/10477511.png",
+            "https://cdn-icons-png.flaticon.com/128/1469/1469584.png",
+            "https://cdn-icons-png.flaticon.com/128/11035/11035630.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851216.png",
+            "https://cdn-icons-png.flaticon.com/128/8304/8304094.png",
+            "https://cdn-icons-png.flaticon.com/128/11052/11052505.png",
+            "https://cdn-icons-png.flaticon.com/128/7357/7357207.png",
+            "https://cdn-icons-png.flaticon.com/128/3993/3993143.png",
+            "https://cdn-icons-png.flaticon.com/128/10851/10851262.png",
+            "https://cdn-icons-png.flaticon.com/128/11349/11349015.png"
+        ];
+        function showAIAssistant() {
+            // if (isMuted) return; // Allow showing even if muted per user request
+
+
+            const aiWrap = document.getElementById('aiAssistant');
+            const aiMsg = document.getElementById('aiMsg');
+            if (!aiWrap || !aiMsg) return;
+            const aiImg = aiWrap.querySelector('img');
+
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+
+            aiImg.src = randomAvatar;
+            aiMsg.innerText = randomPhrase;
+            aiWrap.classList.add('visible');
+
+            setTimeout(() => {
+                aiWrap.classList.remove('visible');
+            }, 5000); // Show for 5 seconds
+        }
+
+        // Initial timer is handled by IntersectionObserver
+
+    </script>
+    <div id="socialToast" class="social-toast">
+        <div class="dot"></div>
+        <div class="toast-content" id="toastText"></div>
+    </div>
+</body>
+
+</html>
