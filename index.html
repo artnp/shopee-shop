@@ -2016,78 +2016,98 @@
                 window.isShowingSuggestions = false;
                 document.title = "🎞️ ดูคลิปรีวิวสินค้าที่นี่";
             } else {
-                const cleanQuery = keyword.toLowerCase().replace(/\s+/g, "");
+                // 1. Prepare Query
+                const query = keyword.toLowerCase().trim();
+                const terms = query.split(/\s+/).filter(t => t.length > 0);
+                const queryNoSpace = query.replace(/\s+/g, "");
+
                 document.title = `รวมรีวิว: ${keyword} | น้องรับจ้าง`;
 
+                // 2. Score Products
                 let scored = allProducts.map(p => {
                     let score = 0;
-                    const cleanTitle = p.title.toLowerCase().replace(/\s+/g, "");
-                    const cleanDesc = p.desc.toLowerCase();
 
-                    // 0. TAG SEARCH (Priority: Search every word in tags)
-                    // Use 'keyword' to preserve spaces for splitting
-                    const searchTerms = keyword.toLowerCase().split(/\s+/).filter(t => t.length > 0);
-                    let matchedTermsCount = 0;
+                    // Prepare Product Data
+                    const title = p.title ? p.title.toLowerCase() : "";
+                    const desc = p.desc ? p.desc.toLowerCase() : "";
+                    const titleNoSpace = title.replace(/\s+/g, "");
+                    const tags = (p.tags && Array.isArray(p.tags)) ? p.tags.map(t => String(t).toLowerCase()) : [];
 
-                    if (p.tags && Array.isArray(p.tags)) {
-                        searchTerms.forEach(term => {
-                            // Check if this term matches ANY tag (partial match within tag string)
-                            const isMatch = p.tags.some(t => typeof t === 'string' && t.toLowerCase().includes(term));
-                            if (isMatch) matchedTermsCount++;
-                        });
+                    // --- Criteria 1: Exact Phrase (Highest Priority) ---
+                    if (title.includes(query)) score += 5000;
+                    else if (desc.includes(query)) score += 1000;
+
+                    // --- Criteria 2: Reverse Inclusion (Query contains Title) ---
+                    // Useful when User query is long: "พัดลมพกพาขึ้นเครื่อง"
+                    // Product Title: "พัดลมพกพา"
+                    if (title.length > 2 && query.includes(title)) {
+                        score += 3000 + (title.length * 100);
+                    }
+                    else if (titleNoSpace.length > 2 && queryNoSpace.includes(titleNoSpace)) {
+                        score += 2500;
                     }
 
-                    // If ALL terms are found in the tags, give it a massive boost
-                    if (matchedTermsCount === searchTerms.length && searchTerms.length > 0) {
-                        score += 5000;
-                    } else if (matchedTermsCount > 0) {
-                        score += matchedTermsCount * 200;
-                    }
-
-                    // 1. Direct Inclusion (The classic)
-                    if (cleanTitle.includes(cleanQuery)) score += 100;
-                    if (cleanQuery.includes(cleanTitle)) score += 100;
-
-                    // 2. Token Intersection (The Fix)
-                    // Split Product Title into 2-char chunks
-                    let chunks = [];
-                    // Remove ALL whitespace before chunking
-                    const tightTitle = cleanTitle.replace(/\s+/g, "");
-                    for (let i = 0; i < tightTitle.length - 1; i += 2) {
-                        chunks.push(tightTitle.substr(i, 2)); // Bigrams
-                    }
-
-                    let foundChunks = 0;
-                    chunks.forEach(chunk => {
-                        if (cleanQuery.includes(chunk)) foundChunks++;
+                    // --- Criteria 3: Reverse Token Matching (Query contains keywords from Title) ---
+                    // Product: "พัดลม พกพา" -> Key: "พัดลม", "พกพา"
+                    // Query: "พัดลมพกพาขึ้นเครื่อง"
+                    const titleTokens = title.split(/\s+/).filter(t => t.length > 2);
+                    let titleKWMatches = 0;
+                    titleTokens.forEach(tk => {
+                        if (query.includes(tk)) titleKWMatches++;
                     });
+                    if (titleKWMatches > 0) {
+                        score += titleKWMatches * 500;
+                    }
 
-                    // ULTRA LOW THRESHOLD: Just 1 chunk match is enough
-                    if (foundChunks > 0) {
-                        // Score calculation
-                        // Base score = Raw number of matches (The more matches, the higher)
-                        score += foundChunks * 50;
+                    // --- Criteria 4: Forward Token Matching (Flexible Order) ---
+                    let matchedCount = 0;
+                    terms.forEach(term => {
+                        let found = false;
+                        if (title.includes(term)) { score += 500; found = true; }
+                        else if (tags.some(t => t.includes(term))) { score += 400; found = true; }
+                        else if (desc.includes(term)) { score += 100; found = true; }
+                        if (found) matchedCount++;
+                    });
+                    if (matchedCount === terms.length && terms.length > 0) score += 2000;
 
-                        // Percentage Boost (Bonus if it's a dense match)
-                        const ratio = foundChunks / chunks.length;
-                        score += ratio * 200;
+                    // --- Criteria 5: Bigram Frequency (Fuzzy Match / No Spaces) ---
+                    // Helps when user types without spaces "พัดลมพกพา" but title is "พัดลม พกพา"
+                    // Or query "พัดลมพกพาขึ้นเครื่อง" vs "พัดลมพกพา"
+                    if (score < 500 && query.length > 2) {
+                        let commonBigrams = 0;
+                        const bigramSet = new Set();
+                        for (let i = 0; i < titleNoSpace.length - 1; i++) {
+                            bigramSet.add(titleNoSpace.substr(i, 2));
+                        }
+
+                        for (let i = 0; i < queryNoSpace.length - 1; i++) {
+                            const bg = queryNoSpace.substr(i, 2);
+                            if (bigramSet.has(bg)) commonBigrams++;
+                        }
+
+                        if (commonBigrams > 0) {
+                            const density = commonBigrams / (queryNoSpace.length - 1);
+                            // If > 30% of query bigrams exist in title, it's relevant
+                            if (density > 0.3) score += commonBigrams * 50;
+                        }
                     }
 
                     return { ...p, score };
-                }).filter(p => p.score > 0); // ANY match > 0 is accepted
+                }).filter(p => p.score > 0);
 
                 scored.sort((a, b) => b.score - a.score);
 
+                // 3. Fallback Logic
                 if (scored.length === 0) {
                     window.isShowingSuggestions = true;
-                    // Fallback to suggestions based on FIRST word of query only (Desperate measure)
-                    // If user typed "สว่าน บ้าบอ" -> try searching just "สว่าน"
-                    const firstChunk = keyword.split(' ')[0];
-                    if (firstChunk && firstChunk.length > 2 && firstChunk !== keyword) {
-                        filterProducts(firstChunk); // Recursive retry with shorter query!
-                        return; // Stop here
+                    // Auto-retry with just the first word if query was long
+                    if (terms.length > 1) {
+                        const firstChunk = terms[0];
+                        if (firstChunk.length > 1) {
+                            filterProducts(firstChunk);
+                            return;
+                        }
                     }
-
                     displayProducts = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 15);
                 } else {
                     window.isShowingSuggestions = false;
@@ -2381,7 +2401,7 @@
                 "sku": v.id,
                 "offers": {
                     "@type": "Offer",
-                    "url": "https://nongrabjang.netlify.app/?v=" + v.id,
+                    "url": v.link,
                     "priceCurrency": "THB",
                     "price": price,
                     "availability": "https://schema.org/InStock"
