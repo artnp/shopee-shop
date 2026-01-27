@@ -2816,7 +2816,7 @@
                 if (imgUrl.startsWith("['")) imgUrl = imgUrl.replace(/\['|'\]/g, "").split("', '")[0];
 
                 return `
-            <a href="?v=${item.id}" target="_blank" class="story-tag" rel="nofollow">
+            <a href="?v=${item.id}" class="story-tag" rel="nofollow">
                 <img src="${imgUrl}" alt="img" loading="lazy">
                 <span>${item.title}</span>
             </a>`;
