@@ -2790,7 +2790,7 @@
 
                     return `
                     <div class="saved-item ${isActive ? 'active' : ''}">
-                        <a href="${item.link || '#'}" target="_blank" rel="nofollow" style="text-decoration:none; display:flex; align-items:center; flex-grow:1; color:inherit;">
+                        <a href="${item.link || '#'}" rel="nofollow" style="text-decoration:none; display:flex; align-items:center; flex-grow:1; color:inherit;">
                              ${imgUrl ? `<img src="${imgUrl}" alt="img">` : '<div style="width:40px;height:40px;background:#555;border-radius:8px;margin-right:10px;display:flex;align-items:center;justify-content:center;">🛍️</div>'}
                              <div class="saved-item-title">${item.title}</div>
                         </a>
@@ -3042,7 +3042,7 @@
                     // Limit to 10 latest stories
                     posts.slice(0, 10).forEach(post => {
                         html += `
-                        <a href="posts/${post.slug}" class="story-tag" target="_blank">
+                        <a href="posts/${post.slug}" class="story-tag">
                             <img src="${post.thumb}" alt="thumb">
                             <span>${post.title}</span>
                         </a>`;
