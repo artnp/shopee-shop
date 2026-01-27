@@ -252,26 +252,25 @@
             z-index: 10;
         }
 
-        /* Adjust Story Bar (Recommended) to be below Saved Bar */
-        /* Adjust Story Bar (Recommended) to be below Saved Bar */
+        /* --- Tag Cloud (Recommended Stories) --- */
         #storyBar {
             position: fixed;
-            top: 80px;
-            /* Below Search Input */
+            top: 75px;
+            /* Below Search Bar */
             left: 50%;
             transform: translateX(-50%);
             width: 95%;
             max-width: 440px;
-            height: 50px;
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding: 0 5px;
-            z-index: 45;
             white-space: nowrap;
-            /* Hide scrollbar */
+            padding: 5px 5px 10px 5px;
+            z-index: 45;
             scrollbar-width: none;
+            /* Firefox */
             -ms-overflow-style: none;
+            /* IE */
         }
 
         #storyBar::-webkit-scrollbar {
@@ -1663,10 +1662,7 @@
         <div class="spinner"></div>
     </div>
 
-    <div class="search-container">
-        <input type="text" class="search-input" id="searchInput" placeholder="🔍 ค้นหาสินค้า..."
-            oninput="handleSearch(this.value)">
-    </div>
+    <!-- Search Bar Removed -->
 
 
     <!-- Saved Bar moved here -->
@@ -1928,7 +1924,7 @@
 
                 if (keyword) {
                     const decodedKey = decodeURIComponent(keyword).trim();
-                    document.getElementById('searchInput').value = decodedKey;
+                    // document.getElementById('searchInput').value = decodedKey;
 
                     // Smart Routing: Filter Playlist to MATCH keyword only
                     const lowerKey = decodedKey.toLowerCase();
@@ -2120,7 +2116,7 @@
         function handleSearch(val) { filterProducts(val); }
 
         let currentRenderIndex = 0;
-        const RENDER_BATCH_SIZE = 5; // Load smaller chunks for mobile stability
+        const RENDER_BATCH_SIZE = 5;
 
         function renderList() {
             const container = document.getElementById('container');
@@ -2135,7 +2131,7 @@
             }
 
             initObserver();
-            appendNextBatch();
+            appendNextBatch(); // Initial load
             updateAllMuteIcons();
             updateNavState();
         }
@@ -2146,6 +2142,57 @@
             const nextBatch = displayProducts.slice(currentRenderIndex, currentRenderIndex + RENDER_BATCH_SIZE);
             nextBatch.forEach(v => appendVideo(v));
             currentRenderIndex += nextBatch.length;
+        }
+
+
+        function appendAdSlide(v) {
+            const container = document.getElementById('container');
+            const div = document.createElement('div');
+            div.className = 'short-item ad-slide'; // Add special class if needed for styling
+            div.id = 'ad-' + v.id + '-' + Math.random().toString(36).substr(2, 5); // Unique ID
+
+            const priceVal = parseShopeePrice(v.price);
+            const formattedPrice = priceVal.toLocaleString();
+            const fakePrice = priceVal > 0 ? Math.floor(priceVal * 1.5).toLocaleString() : '';
+
+            // Ad Template (Full Screen Image Focus)
+            div.innerHTML = `
+            <div style="position:absolute; width:100%; height:100%; background: #000;">
+                <img src="${v.image}" style="width:100%; height:100%; object-fit:cover; opacity:0.6; filter:blur(2px); transform:scale(1.1);">
+                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, transparent 40%, #000 90%);"></div>
+                
+                <!-- Main Product Image (Clear) -->
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -60%); width:280px; height:280px; border-radius:20px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.8); border:2px solid rgba(255,255,255,0.2);">
+                     <img src="${v.image}" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+
+                <!-- Ad Overlay Content -->
+                <div class="overlay" style="padding-bottom:140px; justify-content:center; align-items:center; text-align:center;">
+                    <div style="background:#ccff00; color:#000; padding:4px 12px; border-radius:15px; font-weight:900; font-size:0.8rem; margin-bottom:15px; display:inline-block; box-shadow:0 0 15px rgba(204,255,0,0.6);">
+                        ⚡ SPONSORED
+                    </div>
+                    
+                    <div class="product-title" style="font-size:1.4rem; text-shadow:0 2px 10px #000; margin-bottom:10px;">${v.title}</div>
+                    
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin-bottom:25px;">
+                        <div style="color:#ff4d4d; text-decoration:line-through; font-size:1.1rem; font-weight:bold;">฿${fakePrice}</div>
+                        <div style="color:#00ff00; font-size:2.5rem; font-weight:900; text-shadow:0 0 20px rgba(0,255,0,0.5); line-height:1;">฿${formattedPrice}</div>
+                        <div style="color:#eee; font-size:0.9rem;">(ลดราคาพิเศษเฉพาะวันนี้)</div>
+                    </div>
+
+                    <a href="${v.link}" target="_blank" class="buy-btn" style="width:80%; max-width:250px; background:linear-gradient(90deg, #ff4d4d, #ff0000); transform:scale(1.1); animation:pulseBtn 1.5s infinite;">
+                        <span style="font-size:1.2rem;">🛒 สั่งซื้อทันที</span>
+                    </a>
+                </div>
+            </div>`;
+
+            // Add simple pulse animation for button
+            const style = document.createElement('style');
+            style.innerHTML = `@keyframes pulseBtn { 0% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7); } 70% { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(255, 77, 77, 0); } 100% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); } }`;
+            div.appendChild(style);
+
+            container.appendChild(div);
+            if (window.observer) window.observer.observe(div);
         }
 
         function appendVideo(v) {
@@ -2983,6 +3030,28 @@
         <div class="dot"></div>
         <div class="toast-content" id="toastText"></div>
     </div>
+
+    <script>
+        // Fetch and Display Recommended Blogs
+        fetch('data/posts_index.json')
+            .then(response => response.json())
+            .then(posts => {
+                const storyBar = document.getElementById('storyBar');
+                if (posts.length > 0) {
+                    let html = '';
+                    // Limit to 10 latest stories
+                    posts.slice(0, 10).forEach(post => {
+                        html += `
+                        <a href="posts/${post.slug}" class="story-tag" target="_blank">
+                            <img src="${post.thumb}" alt="thumb">
+                            <span>${post.title}</span>
+                        </a>`;
+                    });
+                    storyBar.innerHTML = html;
+                }
+            })
+            .catch(err => console.error('Failed to load blog posts:', err));
+    </script>
 </body>
 
 </html>
