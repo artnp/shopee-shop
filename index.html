@@ -1924,19 +1924,68 @@
 
                 if (keyword) {
                     const decodedKey = decodeURIComponent(keyword).trim();
-                    // document.getElementById('searchInput').value = decodedKey;
 
-                    // Smart Routing: Filter Playlist to MATCH keyword only
-                    const lowerKey = decodedKey.toLowerCase();
-                    const filtered = allProducts.filter(p =>
-                        p.title.toLowerCase().includes(lowerKey) ||
-                        p.desc.toLowerCase().includes(lowerKey)
-                    );
+                    // Smart Search: แยกคำออกเป็นชิ้นเล็กๆ สำหรับภาษาไทย
+                    const queryLower = decodedKey.toLowerCase();
+                    const queryNoSpace = queryLower.replace(/\s+/g, '');
+
+                    // สร้าง Bigrams (2 ตัวอักษร) จาก Query - จับคำสั้นๆ ได้ดีกว่า
+                    const bigrams = new Set();
+                    for (let i = 0; i < queryNoSpace.length - 1; i++) {
+                        bigrams.add(queryNoSpace.substring(i, i + 2));
+                    }
+
+                    // สร้าง Trigrams (3 ตัวอักษร) จาก Query
+                    const trigrams = new Set();
+                    for (let i = 0; i < queryNoSpace.length - 2; i++) {
+                        trigrams.add(queryNoSpace.substring(i, i + 3));
+                    }
+
+                    const filtered = allProducts.map(p => {
+                        const titleLower = (p.title || '').toLowerCase();
+                        const descLower = (p.desc || '').toLowerCase();
+                        const titleNoSpace = titleLower.replace(/\s+/g, '');
+                        const combined = titleNoSpace + descLower.replace(/\s+/g, '');
+
+                        let score = 0;
+
+                        // Exact Match (Highest Priority)
+                        if (titleNoSpace.includes(queryNoSpace)) score += 10000;
+                        else if (combined.includes(queryNoSpace)) score += 5000;
+
+                        // Title is substring of Query (Reverse Match)
+                        if (titleNoSpace.length > 2 && queryNoSpace.includes(titleNoSpace)) {
+                            score += 3000 + (titleNoSpace.length * 100);
+                        }
+
+                        // Bigram Matching (More Flexible - จับคำสั้นๆ เช่น "หลังคา", "แสง")
+                        let matchedBigrams = 0;
+                        bigrams.forEach(bg => {
+                            if (combined.includes(bg)) matchedBigrams++;
+                        });
+                        // ถ้าเจอ >= 30% ของ Bigrams ก็ถือว่า Match
+                        const bigramRatio = matchedBigrams / bigrams.size;
+                        if (bigramRatio >= 0.3) {
+                            score += Math.floor(bigramRatio * 1000);
+                        }
+
+                        // Trigram Matching (More Precise)
+                        let matchedTrigrams = 0;
+                        trigrams.forEach(tg => {
+                            if (combined.includes(tg)) matchedTrigrams++;
+                        });
+                        if (matchedTrigrams > 0) {
+                            score += matchedTrigrams * 100;
+                        }
+
+                        return { ...p, score };
+                    }).filter(p => p.score > 0);
+
+                    // Sort by score (highest first)
+                    filtered.sort((a, b) => b.score - a.score);
 
                     if (filtered.length > 0) {
                         displayProducts = filtered;
-                        // Shuffle slightly for freshness, but keep relevance
-                        displayProducts.sort(() => 0.5 - Math.random());
                     } else {
                         // Fallback if not found
                         displayProducts = [...allProducts].sort(() => 0.5 - Math.random());
@@ -3032,25 +3081,27 @@
     </div>
 
     <script>
-        // Fetch and Display Recommended Blogs
+        // Fetch and Display Recommended Blogs (Silently fail if not available)
         fetch('data/posts_index.json')
-            .then(response => response.json())
-            .then(posts => {
-                const storyBar = document.getElementById('storyBar');
-                if (posts.length > 0) {
-                    let html = '';
-                    // Limit to 10 latest stories
-                    posts.slice(0, 10).forEach(post => {
-                        html += `
-                        <a href="posts/${post.slug}" class="story-tag">
-                            <img src="${post.thumb}" alt="thumb">
-                            <span>${post.title}</span>
-                        </a>`;
-                    });
-                    storyBar.innerHTML = html;
-                }
+            .then(response => {
+                if (!response.ok) return []; // Silently return empty if file not found
+                return response.json();
             })
-            .catch(err => console.error('Failed to load blog posts:', err));
+            .then(posts => {
+                if (!posts || posts.length === 0) return;
+                const storyBar = document.getElementById('storyBar');
+                let html = '';
+                // Limit to 10 latest stories
+                posts.slice(0, 10).forEach(post => {
+                    html += `
+                    <a href="posts/${post.slug}" class="story-tag">
+                        <img src="${post.thumb}" alt="thumb">
+                        <span>${post.title}</span>
+                    </a>`;
+                });
+                storyBar.innerHTML = html;
+            })
+            .catch(() => { }); // Silently ignore errors
     </script>
 </body>
 
