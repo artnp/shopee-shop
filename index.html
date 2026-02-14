@@ -1848,8 +1848,22 @@
         let initialTargetId = null; // Store product ID from initial URL
         let aiTimeout = null;
 
-        // Capture first interaction to allow auto-audio
-        const setInteracted = () => { userInteracted = true; };
+        // Capture first interaction to force unmute immediately
+        const setInteracted = () => {
+            if (userInteracted) return; // Only run once
+            userInteracted = true;
+            isMuted = false;
+            // Unmute & play all videos immediately
+            document.querySelectorAll('video').forEach(v => {
+                v.muted = false;
+                v.volume = 1.0;
+            });
+            updateAllMuteIcons();
+            // Remove listeners after first interaction
+            document.removeEventListener('click', setInteracted, { capture: true });
+            document.removeEventListener('keydown', setInteracted, { capture: true });
+            document.removeEventListener('touchstart', setInteracted, { capture: true });
+        };
         document.addEventListener('click', setInteracted, { capture: true });
         document.addEventListener('keydown', setInteracted, { capture: true });
         document.addEventListener('touchstart', setInteracted, { capture: true });
@@ -2838,11 +2852,9 @@
                     }
 
                     return `
-                    <div class="saved-item ${isActive ? 'active' : ''}">
-                        <a href="?v=${item.id}" onclick="playVideo('${item.id}'); return false;" rel="nofollow" style="text-decoration:none; display:flex; align-items:center; flex-grow:1; color:inherit; cursor:pointer;">
+                    <div class="saved-item ${isActive ? 'active' : ''}" onclick="openAndRemoveSaved('${item.id}')" style="cursor:pointer;">
                              ${imgUrl ? `<img src="${imgUrl}" alt="img">` : '<div style="width:40px;height:40px;background:#555;border-radius:8px;margin-right:10px;display:flex;align-items:center;justify-content:center;">🛍️</div>'}
                              <div class="saved-item-title">${item.title}</div>
-                        </a>
                         <div class="saved-remove" onclick="removeSaved(event, '${item.id}')">×</div>
                     </div>`;
                 }).join('');
@@ -2850,6 +2862,24 @@
 
             bar.innerHTML = contentHTML;
         }
+
+        window.openAndRemoveSaved = function (id) {
+            // 1. Pause all videos
+            pauseAll();
+
+            // 2. Open Shopee link in new tab
+            const prod = allProducts.find(p => String(p.id) === String(id));
+            if (prod && prod.link) {
+                window.open(prod.link, '_blank');
+            }
+
+            // 3. Remove from saved list
+            savedList = savedList.filter(x => x.id !== id);
+            localStorage.setItem('shopeeShortsSaved', JSON.stringify(savedList));
+            const btn = document.getElementById('btn-save-' + id);
+            if (btn) btn.classList.remove('saved');
+            renderSavedBar();
+        };
 
         function renderStoryBar() {
             const bar = document.getElementById('storyBar');
