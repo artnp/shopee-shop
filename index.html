@@ -2839,7 +2839,7 @@
 
                     return `
                     <div class="saved-item ${isActive ? 'active' : ''}">
-                        <a href="${item.link || '#'}" rel="nofollow" style="text-decoration:none; display:flex; align-items:center; flex-grow:1; color:inherit;">
+                        <a href="?v=${item.id}" onclick="playVideo('${item.id}'); return false;" rel="nofollow" style="text-decoration:none; display:flex; align-items:center; flex-grow:1; color:inherit; cursor:pointer;">
                              ${imgUrl ? `<img src="${imgUrl}" alt="img">` : '<div style="width:40px;height:40px;background:#555;border-radius:8px;margin-right:10px;display:flex;align-items:center;justify-content:center;">🛍️</div>'}
                              <div class="saved-item-title">${item.title}</div>
                         </a>
@@ -3080,29 +3080,7 @@
         <div class="toast-content" id="toastText"></div>
     </div>
 
-    <script>
-        // Fetch and Display Recommended Blogs (Silently fail if not available)
-        fetch('data/posts_index.json')
-            .then(response => {
-                if (!response.ok) return []; // Silently return empty if file not found
-                return response.json();
-            })
-            .then(posts => {
-                if (!posts || posts.length === 0) return;
-                const storyBar = document.getElementById('storyBar');
-                let html = '';
-                // Limit to 10 latest stories
-                posts.slice(0, 10).forEach(post => {
-                    html += `
-                    <a href="posts/${post.slug}" class="story-tag">
-                        <img src="${post.thumb}" alt="thumb">
-                        <span>${post.title}</span>
-                    </a>`;
-                });
-                storyBar.innerHTML = html;
-            })
-            .catch(() => { }); // Silently ignore errors
-    </script>
+    <!-- posts_index.json fetch removed: file does not exist -->
 </body>
 
 </html>
