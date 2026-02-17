@@ -1849,9 +1849,20 @@
         let aiTimeout = null;
 
         // Capture first interaction to force unmute immediately
-        const setInteracted = () => {
+        const setInteracted = (e) => {
             if (userInteracted) return; // Only run once
             userInteracted = true;
+
+            // If user specifically clicked the mute button, let toggleMute handle it
+            if (e && e.target && e.target.closest('.btn-mute')) {
+                // We still remove listeners and mark as interacted, 
+                // but we don't flip isMuted here to avoid the double-toggle.
+                document.removeEventListener('click', setInteracted, { capture: true });
+                document.removeEventListener('keydown', setInteracted, { capture: true });
+                document.removeEventListener('touchstart', setInteracted, { capture: true });
+                return;
+            }
+
             isMuted = false;
             // Unmute & play all videos immediately
             document.querySelectorAll('video').forEach(v => {
